@@ -4,10 +4,11 @@ import { cookies } from 'next/headers'
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    console.log('Starting delete process for appointment:', params.id)
+    const { id } = await params
+    console.log('Starting delete process for appointment:', id)
     
     const supabase = createRouteHandlerClient({ cookies })
     
@@ -49,7 +50,7 @@ export async function DELETE(
     const { data: existingAppointment, error: checkError } = await supabase
       .from('Appointment')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (checkError) {
@@ -63,7 +64,7 @@ export async function DELETE(
     const { data: deletedAppointment, error: deleteError } = await supabase
       .from('Appointment')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
 
     if (deleteError) {

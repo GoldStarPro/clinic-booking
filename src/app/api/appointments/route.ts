@@ -1,9 +1,19 @@
 import { NextResponse } from 'next/server'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
+import { checkRateLimit, getClientIP, validateAppointmentData } from '@/lib/security'
 
 export async function GET(request: Request) {
   try {
+    // Rate limiting
+    const clientIP = getClientIP(request.headers)
+    if (checkRateLimit(clientIP, 100, 60000)) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        { status: 429 }
+      )
+    }
+
     const supabase = createRouteHandlerClient({ cookies })
     
     // Get the current user
@@ -49,6 +59,15 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    // Rate limiting
+    const clientIP = getClientIP(request.headers)
+    if (checkRateLimit(clientIP, 50, 60000)) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        { status: 429 }
+      )
+    }
+
     const supabase = createRouteHandlerClient({ cookies })
     
     // Get the current user
@@ -59,14 +78,17 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { doctorId, date, time, symptoms, notes } = body
-
-    if (!doctorId || !date || !time || !symptoms) {
+    
+    // Validate and sanitize input
+    const validation = validateAppointmentData(body)
+    if (!validation.isValid) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Validation failed', details: validation.errors },
         { status: 400 }
       )
     }
+
+    const { doctorId, date, time, symptoms, notes } = validation.sanitized!
 
     // Create new appointment
     const { data: appointment, error } = await supabase

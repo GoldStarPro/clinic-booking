@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { use, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import Link from 'next/link'
@@ -15,7 +15,8 @@ interface User {
   address?: string
 }
 
-export default function EditUser({ params }: { params: { id: string } }) {
+export default function EditUser({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
   const router = useRouter()
   const supabase = createClientComponentClient()
   const [loading, setLoading] = useState(true)
@@ -33,7 +34,7 @@ export default function EditUser({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     fetchUser()
-  }, [params.id])
+  }, [id])
 
   const fetchUser = async () => {
     try {
@@ -43,7 +44,7 @@ export default function EditUser({ params }: { params: { id: string } }) {
       const { data, error } = await supabase
         .from('User')
         .select('*')
-        .eq('id', params.id)
+        .eq('id', id)
         .single()
 
       if (error) {
@@ -94,7 +95,7 @@ export default function EditUser({ params }: { params: { id: string } }) {
       const { data: targetUser, error: selectError } = await supabase
         .from('User')
         .select('*')
-        .eq('id', params.id)
+        .eq('id', id)
         .single()
 
       if (selectError) {
@@ -106,7 +107,7 @@ export default function EditUser({ params }: { params: { id: string } }) {
 
       // Log thông tin trước khi update
       console.log('Updating user with data:', {
-        id: params.id,
+        id,
         name: formData.name,
         role: formData.role,
         specialty: formData.role === 'DOCTOR' ? formData.specialty : null,
@@ -125,7 +126,7 @@ export default function EditUser({ params }: { params: { id: string } }) {
           address: formData.address,
           "updatedAt": new Date().toISOString()
         })
-        .eq('id', params.id)
+        .eq('id', id)
 
       if (error) {
         console.error('Update error:', error)
@@ -136,7 +137,7 @@ export default function EditUser({ params }: { params: { id: string } }) {
       const { data: updatedUser, error: checkError } = await supabase
         .from('User')
         .select('*')
-        .eq('id', params.id)
+        .eq('id', id)
         .single()
 
       if (checkError) {
