@@ -59,12 +59,43 @@ git clone https://github.com/yourusername/clinic-booking.git
      - Run the SQL script to set up all necessary policies and permissions
    ```
 
-6. Start the development server:
+6. Run security check (optional):
+```bash
+npm run security-check
+```
+
+7. Start the development server:
 ```bash
 npm run dev
 ```
 
 The application will be available at http://localhost:3000
+
+## 🔐 Security Updates Applied
+
+This project has been updated to address **26+ security vulnerabilities** reported by GitHub Dependabot:
+
+### Critical Fixes
+- ✅ **CVE-2026-23864**: Next.js HTTP request deserialization DoS
+- ✅ **Authorization Bypass** in Next.js Middleware
+- ✅ **Server-Side Request Forgery (SSRF)**
+- ✅ **Cache Poisoning** vulnerabilities
+- ✅ And 22+ additional CVEs
+
+### Migration from Next.js 14.x → 15.5.12
+If you're upgrading from an older version, see [UPGRADE_GUIDE.md](./docs/security/UPGRADE_GUIDE.md)
+
+### Security Commands
+```bash
+# Run security audit
+npm audit
+
+# Run custom security checks
+npm run security-check
+
+# Check for outdated packages
+npm outdated
+```
 
 ## Environment Variables
 
@@ -84,12 +115,27 @@ The application will be available at http://localhost:3000
 
 ## Tech Stack
 
-- Next.js 14
+- Next.js 15.5.12 (Security Hardened)
+- React 19
 - TypeScript
 - Tailwind CSS
-- Supabase
-- Prisma
+- Supabase (Auth & Database)
+- Prisma ORM
 - PostgreSQL
+
+## 🔒 Security Features
+
+This application includes comprehensive security measures:
+- ✅ **All GitHub Dependabot vulnerabilities fixed** (26+ CVEs patched)
+- ✅ Security headers (XSS, Clickjacking, MIME-sniffing protection)
+- ✅ Rate limiting on all API endpoints
+- ✅ Input validation and sanitization
+- ✅ CORS restrictions with whitelist
+- ✅ Session-based authentication
+- ✅ Role-based access control
+- ✅ SQL injection protection via Prisma
+
+For detailed security information, see [SECURITY.md](./docs/security/SECURITY.md). All project docs are in [docs/](./docs/).
 
 ## Project Structure
 

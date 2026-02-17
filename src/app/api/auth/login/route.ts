@@ -1,14 +1,23 @@
 import { NextResponse } from 'next/server'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
+import { checkRateLimit, getClientIP, isValidEmail, sanitizeString } from '@/lib/security'
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
   try {
+    // Rate limiting - stricter for login attempts
+    const clientIP = getClientIP(request.headers)
+    if (checkRateLimit(`login-${clientIP}`, 10, 60000)) {
+      return NextResponse.json(
+        { error: 'Too many login attempts. Please try again later.' },
+        { status: 429 }
+      )
+    }
+
     console.log('Login request received')
     const body = await request.json()
-    console.log('Request body:', body)
     
     const { email, password } = body
 
@@ -20,13 +29,24 @@ export async function POST(request: Request) {
       )
     }
 
+    // Validate email format
+    if (!isValidEmail(email)) {
+      return NextResponse.json(
+        { error: 'Invalid email format' },
+        { status: 400 }
+      )
+    }
+
+    // Sanitize email
+    const sanitizedEmail = sanitizeString(email).toLowerCase().trim()
+
     // Initialize Supabase client
     const supabase = createRouteHandlerClient({ cookies })
 
     // Sign in with Supabase Auth
     console.log('Attempting to sign in with Supabase')
     const { data, error } = await supabase.auth.signInWithPassword({
-      email,
+      email: sanitizedEmail,
       password,
     })
 

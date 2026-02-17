@@ -1,12 +1,32 @@
 import { NextResponse } from 'next/server'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
+import { checkRateLimit, getClientIP, isValidUUID } from '@/lib/security'
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
+
+    // Rate limiting
+    const clientIP = getClientIP(request.headers)
+    if (checkRateLimit(clientIP, 50, 60000)) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        { status: 429 }
+      )
+    }
+
+    // Validate appointment ID
+    if (!isValidUUID(id)) {
+      return NextResponse.json(
+        { error: 'Invalid appointment ID' },
+        { status: 400 }
+      )
+    }
+
     const supabase = createRouteHandlerClient({ cookies })
     
     // Get the current user
@@ -18,12 +38,21 @@ export async function PATCH(
 
     const body = await request.json()
     const { status } = body
+    
+    // Validate status value
+    const validStatuses = ['PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED']
+    if (!status || !validStatuses.includes(status)) {
+      return NextResponse.json(
+        { error: 'Invalid status value' },
+        { status: 400 }
+      )
+    }
 
     // Verify the appointment belongs to the current user
     const { data: appointment, error: fetchError } = await supabase
       .from('Appointment')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('patientId', user.id)
       .single()
 
@@ -41,7 +70,7 @@ export async function PATCH(
         status,
         updatedAt: new Date().toISOString()
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .select(`
         *,
         doctor:User!Appointment_doctorId_fkey (

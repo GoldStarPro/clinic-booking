@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import Link from 'next/link'
+import { formatDateDisplay } from '@/lib/date-utils'
 
 interface Patient {
   name: string
@@ -313,7 +314,7 @@ export default function AdminDashboard() {
                       <div className="text-sm text-gray-500">{appointment.doctor.specialty}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{new Date(appointment.date).toLocaleDateString()}</div>
+                      <div className="text-sm text-gray-900">{formatDateDisplay(appointment.date)}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{appointment.time}</div>

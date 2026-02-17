@@ -9,6 +9,7 @@ import { StatsCard } from '@/components/StatsCard'
 import { AppointmentCard } from '@/components/AppointmentCard'
 import { AppointmentDetailModal } from '@/components/AppointmentDetailModal'
 import { useTheme } from '@/components/ThemeProvider'
+import { formatDateDisplay } from '@/lib/date-utils'
 
 interface Patient {
   name: string
@@ -375,7 +376,7 @@ export default function DoctorDashboard() {
                 key={appointment.id}
                 patientName={appointment.patient.name}
                 doctorName="You"
-                date={new Date(appointment.date).toLocaleDateString()}
+                date={formatDateDisplay(appointment.date)}
                 time={appointment.time}
                 status={appointment.status.toLowerCase() as "pending" | "confirmed" | "completed" | "cancelled"}
                 actionLabel={
@@ -407,7 +408,7 @@ export default function DoctorDashboard() {
           onClose={() => setIsModalOpen(false)}
           appointment={{
             patientName: selectedAppointment.patient.name,
-            date: new Date(selectedAppointment.date).toLocaleDateString(),
+            date: formatDateDisplay(selectedAppointment.date),
             time: selectedAppointment.time,
             status: selectedAppointment.status.toLowerCase() as "pending" | "confirmed" | "completed" | "cancelled",
             symptoms: selectedAppointment.symptoms || 'No symptoms provided',

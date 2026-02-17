@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import Link from 'next/link'
+import { formatDateDisplay } from '@/lib/date-utils'
 
 interface User {
   id: string
@@ -258,7 +259,7 @@ export default function AdminUsers() {
                       <div className="text-sm text-gray-500">{user.address || 'No address'}</div>
                     </td>
                     <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{new Date(user.createdAt).toLocaleDateString()}</div>
+                      <div className="text-sm text-gray-900">{formatDateDisplay(user.createdAt)}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <Link

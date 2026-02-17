@@ -56,13 +56,22 @@ export function HeroSection({ title, subtitle, imageUrl, role, actions }: HeroSe
             )}
           </div>
           <div className="hidden md:block relative h-[300px]">
-            <Image
-              src={imageUrl}
-              alt="Hero"
-              fill
-              className="object-cover rounded-xl shadow-xl"
-              priority
-            />
+            {imageUrl ? (
+              <Image
+                src={imageUrl}
+                alt="Hero"
+                fill
+                className="object-cover rounded-xl shadow-xl"
+                priority
+                unoptimized
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-blue-400 via-purple-400 to-pink-400 rounded-xl shadow-xl flex items-center justify-center">
+                <div className="text-white text-6xl font-bold opacity-20">
+                  🏥
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

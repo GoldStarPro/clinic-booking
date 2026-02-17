@@ -1,24 +1,34 @@
 import { NextResponse } from 'next/server'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
+import { checkRateLimit, getClientIP, validateRegistrationData } from '@/lib/security'
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
   try {
+    // Rate limiting - stricter for registration
+    const clientIP = getClientIP(request.headers)
+    if (checkRateLimit(`register-${clientIP}`, 5, 300000)) { // 5 requests per 5 minutes
+      return NextResponse.json(
+        { error: 'Too many registration attempts. Please try again later.' },
+        { status: 429 }
+      )
+    }
+
     console.log('Register request received')
     const body = await request.json()
-    console.log('Request body:', body)
     
-    const { email, password, name, phone, address } = body
-
-    if (!email || !password || !name) {
-      console.error('Missing required fields')
+    // Validate and sanitize input
+    const validation = validateRegistrationData(body)
+    if (!validation.isValid) {
       return NextResponse.json(
-        { error: 'Email, password and name are required' },
+        { error: 'Validation failed', details: validation.errors },
         { status: 400 }
       )
     }
+
+    const { email, password, name, phone, address } = validation.sanitized!
 
     // Initialize Supabase client
     const supabase = createRouteHandlerClient({ cookies })
