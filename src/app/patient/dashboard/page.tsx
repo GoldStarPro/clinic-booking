@@ -8,6 +8,7 @@ import { HeroSection } from '@/components/HeroSection'
 import { StatsCard } from '@/components/StatsCard'
 import { AppointmentCard } from '@/components/AppointmentCard'
 import { AppointmentDetailModal } from '@/components/AppointmentDetailModal'
+import { formatDateDisplay } from '@/lib/date-utils'
 
 interface Doctor {
   name: string
@@ -273,7 +274,7 @@ export default function PatientDashboard() {
                 key={appointment.id}
                 patientName="You"
                 doctorName={appointment.doctor.name}
-                date={new Date(appointment.date).toLocaleDateString()}
+                date={formatDateDisplay(appointment.date)}
                 time={appointment.time}
                 status={appointment.status.toLowerCase() as "pending" | "confirmed" | "completed" | "cancelled"}
                 actionLabel="View Details"
@@ -292,7 +293,7 @@ export default function PatientDashboard() {
           onClose={() => setIsModalOpen(false)}
           appointment={{
             patientName: "You",
-            date: new Date(selectedAppointment.date).toLocaleDateString(),
+            date: formatDateDisplay(selectedAppointment.date),
             time: selectedAppointment.time,
             status: selectedAppointment.status.toLowerCase() as "pending" | "confirmed" | "completed" | "cancelled",
             symptoms: selectedAppointment.symptoms || 'No symptoms provided',
