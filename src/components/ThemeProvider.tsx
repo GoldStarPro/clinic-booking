@@ -35,7 +35,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     switch (theme) {
       case 'admin':
         return {
-          background: `linear-gradient(135deg, 
+          backgroundImage: `linear-gradient(135deg, 
             ${value.colors.primary}80 0%, 
             ${value.colors.secondary}80 25%, 
             ${value.colors.primary}80 50%, 
@@ -47,8 +47,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         };
       case 'doctor':
         return {
-          background: `linear-gradient(135deg, ${value.colors.background} 0%, ${value.colors.secondary}40 50%, ${value.colors.primary}40 100%)`,
           backgroundImage: `
+            linear-gradient(135deg, ${value.colors.background} 0%, ${value.colors.secondary}40 50%, ${value.colors.primary}40 100%),
             repeating-linear-gradient(45deg, ${value.colors.primary}40 0px, ${value.colors.primary}40 2px, transparent 2px, transparent 10px),
             repeating-linear-gradient(-45deg, ${value.colors.secondary}40 0px, ${value.colors.secondary}40 2px, transparent 2px, transparent 10px)
           `,
@@ -56,7 +56,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         };
       case 'patient':
         return {
-          background: `linear-gradient(135deg, 
+          backgroundImage: `linear-gradient(135deg, 
             ${value.colors.primary}80 0%, 
             ${value.colors.brown}80 25%, 
             ${value.colors.secondary}80 50%, 
