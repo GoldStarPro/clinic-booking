@@ -61,6 +61,23 @@ try {
     reactVersion.includes('19') || reactVersion.includes('^18'),
     `Current version: ${reactVersion}`
   )
+
+  const postcssRange = packageJson.devDependencies?.postcss || ''
+  const postcssOk =
+    /8\.5\.(2[3-9]|[3-9]\d)/.test(postcssRange) ||
+    /8\.[6-9]/.test(postcssRange) ||
+    /[9]|[1-9]\d/.test(postcssRange)
+  check(
+    'PostCSS is patched (>= 8.5.23)',
+    postcssOk,
+    `Current: ${postcssRange}. Need >= 8.5.23 (sourceMappingURL + XSS advisories)`
+  )
+
+  check(
+    'npm overrides pin PostCSS transitively',
+    Boolean(packageJson.overrides?.postcss),
+    'Add "overrides": { "postcss": "$postcss" } so Next.js nested postcss is also patched'
+  )
 } catch (error) {
   failed++
   console.log(`${RED}✗${RESET} Could not read package.json: ${error.message}`)

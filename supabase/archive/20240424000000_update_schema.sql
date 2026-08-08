@@ -22,11 +22,16 @@ DROP POLICY IF EXISTS "Users can manage their own data" ON "User";
 DROP POLICY IF EXISTS "Service role can do everything" ON "User";
 DROP POLICY IF EXISTS "Service role can do everything" ON "Appointment";
 
--- Cấp quyền truy cập
+-- Cấp quyền truy cập (không grant toàn bộ tables trong schema — tránh lộ bảng nội bộ Prisma)
 GRANT USAGE ON SCHEMA public TO postgres, anon, authenticated, service_role;
-GRANT ALL ON ALL TABLES IN SCHEMA public TO postgres, anon, authenticated, service_role;
-GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO postgres, anon, authenticated, service_role;
-GRANT ALL ON ALL ROUTINES IN SCHEMA public TO postgres, anon, authenticated, service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public."User" TO postgres, anon, authenticated, service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public."Appointment" TO postgres, anon, authenticated, service_role;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO postgres, anon, authenticated, service_role;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO postgres, anon, authenticated, service_role;
+
+-- NOTE: Policies bên dưới đã được thay thế bởi
+-- supabase/migrations/20260808000000_security_hardening.sql
+-- Hãy chạy file hardening đó SAU migration này (SQL Editor hoặc supabase db push).
 
 -- Bật Row Level Security cho tất cả các bảng
 ALTER TABLE "User" ENABLE ROW LEVEL SECURITY;

@@ -42,24 +42,22 @@ git clone https://github.com/yourusername/clinic-booking.git
 
 5. Database Setup:
    ```bash
-   # Apply migration schema Prisma
-   npx prisma migrate dev
+   # Tạo bảng (Prisma)
+   npx prisma migrate deploy
+   # hoặc lần đầu / local: npx prisma db push
 
-   # Generate Prisma Client
    npx prisma generate
-
-   # Push the schema to your database
-   npx prisma db push
-
-   # Seed the database with initial data
    npx prisma db seed
-
-   - Go to SQL Editor on Supabase
-     - Copy and paste the contents of `supabase\migrations\20240424000000_update_schema.sql`
-     - Run the SQL script to set up all necessary policies and permissions
    ```
 
-6. Run security check (optional):
+   Sau đó mở **Supabase → SQL Editor**, chạy **đúng 1 file**:
+   - `supabase/migrations/20260808120000_rls_canonical.sql`
+
+   Auth → Providers → Email:
+   - Minimum password length ≥ **8**
+   - *Prevent use of leaked passwords*: chỉ có trên **Pro** — Free bỏ qua
+
+6. Run security check:
 ```bash
 npm run security-check
 ```
@@ -73,27 +71,25 @@ The application will be available at http://localhost:3000
 
 ## 🔐 Security Updates Applied
 
-This project has been updated to address **26+ security vulnerabilities** reported by GitHub Dependabot:
+This project addresses Dependabot CVEs (Next.js, PostCSS, …) and Supabase Security Advisor findings (RLS, GraphQL, Init Plan, SECURITY DEFINER exposure).
 
-### Critical Fixes
-- ✅ **CVE-2026-23864**: Next.js HTTP request deserialization DoS
-- ✅ **Authorization Bypass** in Next.js Middleware
-- ✅ **Server-Side Request Forgery (SSRF)**
-- ✅ **Cache Poisoning** vulnerabilities
-- ✅ And 22+ additional CVEs
+### Automated bots (merge-only workflow)
+| Bot | What it does | Config |
+|-----|----------------|--------|
+| **Dependabot** | Mở PR khi npm/GitHub Actions có bản vá | `.github/dependabot.yml` |
+| **Security Autofix** | Mỗi tuần chạy `npm audit fix` và tự mở PR | `.github/workflows/security-autofix.yml` |
+| **Security Checks CI** | Fail PR nếu audit/RLS lint regress | `.github/workflows/security.yml` |
 
-### Migration from Next.js 14.x → 15.5.12
-If you're upgrading from an older version, see [UPGRADE_GUIDE.md](./docs/security/UPGRADE_GUIDE.md)
+### Manual (Dashboard / SQL)
+1. Chạy **`supabase/migrations/20260808120000_rls_canonical.sql`** (1 file duy nhất).
+2. Password length ≥ 8. Leaked-password check chỉ trên Pro.
+3. Advisors → Security → **Rerun linter**.
 
 ### Security Commands
 ```bash
-# Run security audit
-npm audit
-
-# Run custom security checks
-npm run security-check
-
-# Check for outdated packages
+npm audit --omit=dev
+npm run security-check          # app checks + SQL RLS lint
+npm run security-lint:sql       # chỉ lint Supabase migrations
 npm outdated
 ```
 
@@ -115,7 +111,7 @@ npm outdated
 
 ## Tech Stack
 
-- Next.js 15.5.12 (Security Hardened)
+- Next.js 15.5.23 (Security Hardened)
 - React 19
 - TypeScript
 - Tailwind CSS

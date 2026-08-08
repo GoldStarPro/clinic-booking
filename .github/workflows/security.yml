@@ -1,0 +1,53 @@
+name: Security Checks
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  schedule:
+    # Quét hàng ngày 02:00 UTC (~09:00 VN)
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  security:
+    name: npm audit + static security checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Production audit (fail on high+)
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Full audit report
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+
+      - name: Static security + RLS lint
+        run: npm run security-check
+
+      - name: Verify PostCSS is patched
+        run: |
+          node -e "
+            const v = require('postcss/package.json').version;
+            const [maj, min, pat] = v.split('.').map(Number);
+            const ok = maj > 8 || (maj === 8 && (min > 5 || (min === 5 && pat >= 23)));
+            if (!ok) {
+              console.error('Vulnerable postcss version:', v, '(need >= 8.5.23)');
+              process.exit(1);
+            }
+            console.log('postcss OK:', v);
+          "

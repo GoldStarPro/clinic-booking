@@ -255,9 +255,9 @@ Script này kiểm tra tự động:
 | Vấn đề | Mức độ | Giải pháp |
 |--------|--------|-----------|
 | Rate limiting in-memory | Trung bình | Dùng Redis/Upstash |
-| RLS Policy "Admin can manage all users" quá rộng | Cao | Thêm điều kiện check role trong JWT |
+| Leaked password (HaveIBeenPwned) | Thấp trên Free | Cần Supabase **Pro**; Free giữ min length ≥ 8 |
 | Không có Content Security Policy header | Trung bình | Thêm CSP header |
-| Password không có strength requirement | Thấp | Thêm regex check |
+| Password strength chỉ dựa length | Thấp | Thêm requirement chữ/số trên Dashboard hoặc validate app |
 | Session timeout không cấu hình rõ ràng | Thấp | Set explicit expiry |
 
 ---

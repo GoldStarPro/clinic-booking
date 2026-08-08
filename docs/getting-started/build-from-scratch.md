@@ -161,51 +161,21 @@ npx prisma generate
 
 ### Bước 9: Setup RLS Policies trên Supabase
 
-Vào Supabase Dashboard → SQL Editor → Chạy:
+Sau khi Prisma đã tạo bảng, mở **Supabase → SQL Editor** và chạy **toàn bộ** file:
 
-```sql
--- Bật RLS
-ALTER TABLE "User" ENABLE ROW LEVEL SECURITY;
-ALTER TABLE "Appointment" ENABLE ROW LEVEL SECURITY;
+`supabase/migrations/20260808120000_rls_canonical.sql`
 
--- User: service_role full access
-CREATE POLICY "Service role bypass" ON "User"
-FOR ALL TO service_role USING (true) WITH CHECK (true);
+File này (1 lần chạy) sẽ:
+- tạo schema `private` + helper an toàn (`search_path`, không lộ RPC)
+- gắn RLS cho `User` / `Appointment`
+- khoá `_prisma_migrations`
+- tắt `pg_graphql` (app dùng REST / supabase-js)
+- thu hẹp GRANT (anon không đụng `Appointment`)
 
--- User: public insert (đăng ký)
-CREATE POLICY "Anyone can register" ON "User"
-FOR INSERT TO anon, authenticated WITH CHECK (true);
+Chi tiết: [🔒 RLS Policies](../database/rls-policies.md)
 
--- User: xem bác sĩ công khai
-CREATE POLICY "Public can see doctors" ON "User"
-FOR SELECT TO anon, authenticated
-USING (role = 'DOCTOR'::"Role");
-
--- User: quản lý data của mình
-CREATE POLICY "Own data" ON "User"
-FOR ALL TO authenticated
-USING (id = auth.uid()::text)
-WITH CHECK (id = auth.uid()::text);
-
--- Appointment: service_role full access
-CREATE POLICY "Service role bypass" ON "Appointment"
-FOR ALL TO service_role USING (true) WITH CHECK (true);
-
--- Appointment: tạo lịch hẹn
-CREATE POLICY "Patient can create" ON "Appointment"
-FOR INSERT TO authenticated
-WITH CHECK ("patientId" = auth.uid()::text);
-
--- Appointment: xem lịch của mình
-CREATE POLICY "Own appointments" ON "Appointment"
-FOR SELECT TO authenticated
-USING ("patientId" = auth.uid()::text OR "doctorId" = auth.uid()::text);
-
--- Appointment: cập nhật lịch của mình
-CREATE POLICY "Update own" ON "Appointment"
-FOR UPDATE TO authenticated
-USING ("patientId" = auth.uid()::text OR "doctorId" = auth.uid()::text);
-```
+Auth → Providers → Email: **Minimum password length = 8**.  
+*Leaked password protection* chỉ có trên Pro — Free bỏ qua.
 
 ---
 

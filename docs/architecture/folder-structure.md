@@ -193,18 +193,21 @@ prisma/
 
 ---
 
-## Chi Tiết: `supabase/migrations/` — RLS Policies
+## Chi Tiết: `supabase/` — RLS (1 file canonical)
 
 ```
-supabase/migrations/
-├── 20240320000000_initial_schema.sql   ← Tạo bảng ban đầu + policies đơn giản
-├── 20240321000000_policies.sql         ← Cập nhật policies chi tiết hơn
-└── 20240424000000_update_schema.sql    ← Policies final (Doctor/Admin/Patient)
+supabase/
+├── migrations/
+│   └── 20260808120000_rls_canonical.sql   ← CHẠY FILE NÀY (duy nhất)
+└── archive/                               ← SQL lịch sử, không dùng khi setup
+    ├── README.md
+    ├── 20240320… / 20240321… / 20240424…
+    └── 20260808000000_security_hardening.sql
 ```
 
-Đây là các file SQL chạy thẳng trên Supabase (không qua Prisma). Chứa các **Row Level Security policies** — quy tắc bảo mật ở tầng database.
+Prisma tạo bảng; file canonical gắn RLS + grants + khoá `_prisma_migrations` + tắt `pg_graphql`.
 
-> Xem giải thích chi tiết: [🔒 RLS Policies](../database/rls-policies.md)
+> Xem giải thích: [🔒 RLS Policies](../database/rls-policies.md)
 
 ---
 
