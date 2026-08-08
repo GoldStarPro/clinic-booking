@@ -95,14 +95,16 @@ Người dùng có thể bật/tắt **Dark Mode**.
 
 ## 6. Dữ Liệu Mẫu (Seed Data)
 
-Khi chạy `npm run seed`, hệ thống sẽ tạo sẵn:
+Khi chạy `npm run seed` (cần `SEED_DOCTOR_PASSWORD` / `SEED_PATIENT_PASSWORD` trong `.env`), hệ thống:
 
-| Loại | Số lượng | Chi tiết |
-|------|----------|---------- |
-| Bác sĩ | 5 | Tim mạch, Nhi, Da liễu, Thần kinh, Chỉnh hình |
-| Bệnh nhân | 3 | Tên Việt Nam |
-| Admin | 1 | Tài khoản quản trị |
-| Lịch hẹn mẫu | 4 | Các trạng thái khác nhau |
+| Loại | Email domain | Chi tiết |
+|------|--------------|----------|
+| Admin | `admin@clinic.com` | Giữ Auth hiện có (không đổi password) |
+| Bác sĩ (5) | `@clinic.com` | Tạo cặp Auth + profile `User` |
+| Bệnh nhân (3) | `@gmail.com` | Tạo cặp Auth + profile `User` |
+| Lịch hẹn | — | 4 bản ghi mẫu |
+
+Seed **không** in mật khẩu ra console / README.
 
 ---
 
