@@ -88,6 +88,21 @@ Sẽ tạo ra:
 - `prisma/schema.prisma`
 - `.env` (thêm DATABASE_URL vào)
 
+Thêm `prisma.config.ts` ở root (Prisma 6.13+) để khai báo schema + seed — **không** dùng `package.json#prisma`:
+
+```ts
+import 'dotenv/config'
+import { defineConfig } from 'prisma/config'
+
+export default defineConfig({
+  schema: 'prisma/schema.prisma',
+  migrations: {
+    path: 'prisma/migrations',
+    seed: 'ts-node prisma/seed.ts',
+  },
+})
+```
+
 ### Bước 7: Viết Prisma Schema
 
 ```prisma

@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
   try {
-    // Rate limiting - stricter for login attempts
+    // Rate limiting — stricter for login attempts
     const clientIP = getClientIP(request.headers)
     if (checkRateLimit(`login-${clientIP}`, 10, 60000)) {
       return NextResponse.json(
@@ -18,7 +18,6 @@ export async function POST(request: Request) {
 
     console.log('Login request received')
     const body = await request.json()
-    
     const { email, password } = body
 
     if (!email || !password) {
@@ -29,22 +28,18 @@ export async function POST(request: Request) {
       )
     }
 
-    // Validate email format
     if (!isValidEmail(email)) {
+      console.error('Invalid email format:', email)
       return NextResponse.json(
         { error: 'Invalid email format' },
         { status: 400 }
       )
     }
 
-    // Sanitize email
     const sanitizedEmail = sanitizeString(email).toLowerCase().trim()
-
-    // Initialize Supabase client
     const supabase = createRouteHandlerClient({ cookies })
 
-    // Sign in with Supabase Auth
-    console.log('Attempting to sign in with Supabase')
+    console.log('Attempting to sign in with Supabase:', sanitizedEmail)
     const { data, error } = await supabase.auth.signInWithPassword({
       email: sanitizedEmail,
       password,
@@ -66,9 +61,9 @@ export async function POST(request: Request) {
       )
     }
 
-    console.log('Auth successful, user data:', data.user)
+    console.log('Auth successful, user id:', data.user.id)
 
-    // Get user profile from database
+    // Load the matching public.User profile (same id as auth.users)
     console.log('Getting user profile from database')
     const { data: userData, error: userError } = await supabase
       .from('User')
@@ -84,10 +79,10 @@ export async function POST(request: Request) {
       )
     }
 
+    // First login after Auth signup may not have a User row yet — create one
     if (!userData) {
       console.log('User not found, creating new profile')
       try {
-        // Create new user profile
         const { data: newUser, error: createError } = await supabase
           .from('User')
           .insert([
@@ -113,8 +108,8 @@ export async function POST(request: Request) {
           )
         }
 
-        console.log('New user created:', newUser)
-        return NextResponse.json({ 
+        console.log('New user profile created:', newUser.id)
+        return NextResponse.json({
           user: newUser,
           isNewUser: true
         })
@@ -127,9 +122,8 @@ export async function POST(request: Request) {
       }
     }
 
-    console.log('User found in database:', userData)
+    console.log('User found in database:', userData.id, userData.role)
 
-    // Check if user has appointments
     console.log('Checking user appointments')
     const { data: appointments, error: appointmentsError } = await supabase
       .from('Appointment')
@@ -144,16 +138,17 @@ export async function POST(request: Request) {
       )
     }
 
-    console.log('User appointments:', appointments)
-    return NextResponse.json({ 
+    console.log('Login complete, appointment count:', appointments.length)
+    return NextResponse.json({
       user: userData,
       hasAppointments: appointments.length > 0
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Login error:', error)
+    const message = error instanceof Error ? error.message : 'Failed to login'
     return NextResponse.json(
-      { error: error.message || 'Failed to login' },
+      { error: message },
       { status: 500 }
     )
   }
-} 
+}

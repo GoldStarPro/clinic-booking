@@ -7,6 +7,7 @@ import React, {
   useEffect,
   useCallback,
 } from 'react';
+import { usePathname } from 'next/navigation';
 import { themes, ThemeType } from '@/lib/theme';
 
 interface ThemeContextType {
@@ -18,9 +19,14 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+// Landing + auth pages keep their own CSS; do not paint role gradients behind them
+const PUBLIC_PATHS = ['/', '/login', '/register'];
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   const [theme, setThemeState] = useState<ThemeType>('patient');
   const [mounted, setMounted] = useState(false);
+  const isPublic = PUBLIC_PATHS.includes(pathname);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as ThemeType;
@@ -40,6 +46,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const colors = themes[theme];
 
   const getBackgroundStyle = (): React.CSSProperties => {
+    if (isPublic) {
+      return { backgroundColor: 'transparent' };
+    }
     if (!mounted) {
       return { backgroundColor: themes.patient.background };
     }
@@ -98,34 +107,36 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         className="min-h-screen transition-colors duration-300"
         style={{
           ...getBackgroundStyle(),
-          color: colors.text,
+          color: isPublic ? undefined : colors.text,
         }}
         suppressHydrationWarning
       >
-        <style jsx global>{`
-          :root {
-            --primary-color: ${colors.primary};
-            --secondary-color: ${colors.secondary};
-            --background-color: ${colors.background};
-            --text-color: ${colors.text};
-            --accent-color: ${colors.accent};
-            --success-color: ${colors.success};
-            --warning-color: ${colors.warning};
-            --error-color: ${colors.error};
-          }
+        {!isPublic && (
+          <style jsx global>{`
+            :root {
+              --primary-color: ${colors.primary};
+              --secondary-color: ${colors.secondary};
+              --background-color: ${colors.background};
+              --text-color: ${colors.text};
+              --accent-color: ${colors.accent};
+              --success-color: ${colors.success};
+              --warning-color: ${colors.warning};
+              --error-color: ${colors.error};
+            }
 
-          @keyframes gradient {
-            0% {
-              background-position: 0% 50%;
+            @keyframes gradient {
+              0% {
+                background-position: 0% 50%;
+              }
+              50% {
+                background-position: 100% 50%;
+              }
+              100% {
+                background-position: 0% 50%;
+              }
             }
-            50% {
-              background-position: 100% 50%;
-            }
-            100% {
-              background-position: 0% 50%;
-            }
-          }
-        `}</style>
+          `}</style>
+        )}
         {children}
       </div>
     </ThemeContext.Provider>

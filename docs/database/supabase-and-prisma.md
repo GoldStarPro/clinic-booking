@@ -203,6 +203,8 @@ datasource db {
 - `DATABASE_URL` (pooled): Vercel/Serverless có nhiều function instances, cần connection pooling để không quá tải database
 - `DIRECT_URL`: Prisma migrate cần giữ connection lâu dài, không dùng được pooler
 
+Lệnh seed và đường dẫn schema nằm trong `prisma.config.ts` (root), không còn trong `package.json#prisma`. URL vẫn khai báo trong `schema.prisma` vì project đang ở Prisma 6.
+
 ---
 
 ## 5. Supabase Auth vs Prisma Database — Phân Vai Rõ Ràng

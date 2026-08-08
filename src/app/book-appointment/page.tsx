@@ -89,10 +89,8 @@ export default function BookAppointment() {
         throw new Error(error.message)
       }
 
-      console.log('Appointment booked:', data)
       router.push('/my-appointments')
     } catch (error) {
-      console.error('Error booking appointment:', error)
       setError(error instanceof Error ? error.message : 'Failed to book appointment')
     } finally {
       setLoading(false)

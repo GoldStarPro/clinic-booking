@@ -7,11 +7,10 @@ export async function POST(request: Request) {
   try {
     console.log('Received request to create user')
     const body = await request.json()
-    console.log('Request body:', body)
-    
+    console.log('Request body:', { ...body, password: undefined })
+
     const { id, email, name, phone, address, role } = body
 
-    // Validate required fields
     if (!id || !email || !name || !phone || !address || !role) {
       console.error('Missing required fields:', { id, email, name, phone, address, role })
       return NextResponse.json(
@@ -20,8 +19,7 @@ export async function POST(request: Request) {
       )
     }
 
-    console.log('Creating user in database...')
-    // Create user profile
+    console.log('Creating user in database:', { id, email, role })
     const user = await prisma.user.create({
       data: {
         id,
@@ -33,33 +31,32 @@ export async function POST(request: Request) {
       }
     })
 
-    console.log('User created successfully:', user)
+    console.log('User created successfully:', user.id)
     return NextResponse.json(user)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating user:', error)
-    
-    // Handle duplicate user error
-    if (error.code === 'P2002') {
-      console.error('Duplicate user error:', error)
+    const prismaError = error as { code?: string; message?: string }
+
+    // Prisma unique constraint (email or id already exists)
+    if (prismaError.code === 'P2002') {
+      console.error('Duplicate user error:', prismaError)
       return NextResponse.json(
         { error: 'User already exists' },
         { status: 409 }
       )
     }
 
-    // Handle other Prisma errors
-    if (error.code) {
-      console.error('Prisma error:', error)
+    if (prismaError.code) {
+      console.error('Prisma error:', prismaError)
       return NextResponse.json(
-        { error: `Database error: ${error.message}` },
+        { error: `Database error: ${prismaError.message}` },
         { status: 500 }
       )
     }
 
-    // Handle any other errors
     return NextResponse.json(
-      { error: error.message || 'Failed to create user profile' },
+      { error: prismaError.message || 'Failed to create user profile' },
       { status: 500 }
     )
   }
-} 
+}

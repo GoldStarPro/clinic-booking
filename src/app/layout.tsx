@@ -2,13 +2,20 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from '@/components/ThemeProvider';
-import { HydrationGate } from '@/components/HydrationGate';
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Clinic Booking System",
+  title: {
+    default: "Clinic Booking System",
+    template: "%s | Clinic Booking",
+  },
   description: "Book your medical appointments online",
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({
@@ -20,11 +27,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className} suppressHydrationWarning>
         <ThemeProvider>
-          <HydrationGate>
-            <main className="min-h-screen" suppressHydrationWarning>
-              {children}
-            </main>
-          </HydrationGate>
+          <main className="min-h-screen" suppressHydrationWarning>
+            {children}
+          </main>
         </ThemeProvider>
       </body>
     </html>

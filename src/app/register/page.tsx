@@ -23,50 +23,19 @@ export default function Register() {
     setError('')
 
     try {
-      console.log('Starting registration process...')
-      console.log('Form data:', { email, password, name, phone, address, role })
-
-      // Sign up with Supabase Auth
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          data: {
-            name,
-            phone,
-            address,
-            role
-          }
-        }
+          data: { name, phone, address, role },
+        },
       })
 
-      console.log('Auth response:', { authData: data, authError: error })
+      if (authError) throw new Error(authError.message)
+      if (!data.user) throw new Error('Registration failed')
 
-      if (error) {
-        console.error('Auth error:', error)
-        throw new Error(error.message)
-      }
-
-      if (!data.user) {
-        console.error('No user data returned from Supabase')
-        throw new Error('Registration failed')
-      }
-
-      console.log('Creating user profile in database...')
       const now = new Date().toISOString()
-      console.log('User data to be inserted:', {
-        id: data.user.id,
-        email: data.user.email,
-        name: data.user.user_metadata?.name || '',
-        phone: data.user.user_metadata?.phone || '',
-        address: data.user.user_metadata?.address || '',
-        role: data.user.user_metadata?.role || 'PATIENT',
-        createdAt: now,
-        updatedAt: now
-      })
-
-      // Create user profile in database
-      const { data: userData, error: insertError } = await supabase
+      const { error: insertError } = await supabase
         .from('User')
         .insert([
           {
@@ -77,25 +46,19 @@ export default function Register() {
             address: data.user.user_metadata?.address || '',
             role: data.user.user_metadata?.role || 'PATIENT',
             createdAt: now,
-            updatedAt: now
-          }
+            updatedAt: now,
+          },
         ])
         .select()
         .single()
 
-      console.log('Database response status:', insertError ? 'error' : '200')
-      console.log('Database response:', userData)
-
       if (insertError) {
-        console.error('Error creating user profile:', insertError)
         throw new Error(`Failed to create user profile: ${insertError.message}`)
       }
 
-      console.log('Registration successful, redirecting to login...')
       router.push('/login')
-    } catch (error) {
-      console.error('Registration error:', error)
-      setError(error instanceof Error ? error.message : 'Failed to register')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to register')
     } finally {
       setLoading(false)
     }
@@ -103,140 +66,163 @@ export default function Register() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-400 via-purple-500 to-pink-400">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-md mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-white mb-2">Create Account</h1>
-            <p className="text-indigo-100">Join our medical community</p>
+      <div className="min-h-screen grid lg:grid-cols-2">
+        <aside className="hidden lg:flex flex-col justify-between p-12 text-white relative overflow-hidden">
+          <div className="absolute inset-0 bg-black/20" aria-hidden />
+          <div className="relative z-10">
+            <Link href="/" className="inline-flex items-center gap-3 text-white no-underline">
+              <span className="h-10 w-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center font-bold">
+                C
+              </span>
+              <span className="text-xl font-semibold tracking-tight">Clinic Booking</span>
+            </Link>
           </div>
-          
-          <div className="bg-white/90 backdrop-blur-sm p-8 rounded-xl shadow-lg border border-white/20">
-            <div className="flex justify-center mb-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                </svg>
-              </div>
+          <div className="relative z-10 max-w-md">
+            <p className="uppercase tracking-[0.18em] text-sm text-white/80 mb-3">Join the clinic</p>
+            <h1 className="text-4xl font-bold leading-tight mb-4">
+              Create your account and start booking care.
+            </h1>
+            <p className="text-indigo-100 text-lg leading-relaxed">
+              Register as a patient in seconds. Doctor accounts are provisioned by clinic admins when needed.
+            </p>
+          </div>
+          <p className="relative z-10 text-sm text-white/70">© {new Date().getFullYear()} Clinic Booking</p>
+        </aside>
+
+        <div className="flex items-center justify-center p-6 sm:p-10">
+          <div className="w-full max-w-md">
+            <div className="lg:hidden text-center mb-6 text-white">
+              <Link href="/" className="inline-flex items-center gap-2 text-white font-semibold mb-3">
+                ← Clinic Booking
+              </Link>
+              <h1 className="text-3xl font-bold mb-2">Create Account</h1>
+              <p className="text-indigo-100">Join our medical community</p>
             </div>
-            
-            {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                {error}
-              </div>
-            )}
 
-            <form onSubmit={handleRegister}>
-              <div className="mb-4">
-                <label className="block text-indigo-700 mb-2 font-medium" htmlFor="name">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  className="w-full p-3 border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  placeholder="Enter your full name"
-                />
+            <div className="bg-white/90 backdrop-blur-sm p-8 rounded-2xl shadow-xl border border-white/20">
+              <div className="hidden lg:block mb-5">
+                <h2 className="text-2xl font-bold text-indigo-900">Sign up</h2>
+                <p className="text-sm text-indigo-500 mt-1">It only takes a minute</p>
               </div>
 
-              <div className="mb-4">
-                <label className="block text-indigo-700 mb-2 font-medium" htmlFor="email">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  className="w-full p-3 border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  placeholder="Enter your email"
-                />
-              </div>
+              {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">
+                  {error}
+                </div>
+              )}
 
-              <div className="mb-4">
-                <label className="block text-indigo-700 mb-2 font-medium" htmlFor="password">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  className="w-full p-3 border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  placeholder="Create a password"
-                />
-              </div>
+              <form onSubmit={handleRegister} className="space-y-3.5">
+                <div>
+                  <label className="block text-indigo-700 mb-1.5 font-medium text-sm" htmlFor="name">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    className="w-full p-3 border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    placeholder="Enter your full name"
+                  />
+                </div>
 
-              <div className="mb-4">
-                <label className="block text-indigo-700 mb-2 font-medium" htmlFor="phone">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  className="w-full p-3 border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  required
-                  placeholder="Enter your phone number"
-                />
-              </div>
+                <div>
+                  <label className="block text-indigo-700 mb-1.5 font-medium text-sm" htmlFor="email">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    className="w-full p-3 border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    placeholder="Enter your email"
+                  />
+                </div>
 
-              <div className="mb-4">
-                <label className="block text-indigo-700 mb-2 font-medium" htmlFor="address">
-                  Address
-                </label>
-                <input
-                  type="text"
-                  id="address"
-                  className="w-full p-3 border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  required
-                  placeholder="Enter your address"
-                />
-              </div>
+                <div>
+                  <label className="block text-indigo-700 mb-1.5 font-medium text-sm" htmlFor="password">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    id="password"
+                    className="w-full p-3 border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={8}
+                    placeholder="At least 8 characters"
+                  />
+                </div>
 
-              <div className="mb-6">
-                <label className="block text-indigo-700 mb-2 font-medium" htmlFor="role">
-                  Role
-                </label>
-                <select
-                  id="role"
-                  className="w-full p-3 border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  required
+                <div>
+                  <label className="block text-indigo-700 mb-1.5 font-medium text-sm" htmlFor="phone">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    className="w-full p-3 border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    required
+                    placeholder="Enter your phone number"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-indigo-700 mb-1.5 font-medium text-sm" htmlFor="address">
+                    Address
+                  </label>
+                  <input
+                    type="text"
+                    id="address"
+                    className="w-full p-3 border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    required
+                    placeholder="Enter your address"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-indigo-700 mb-1.5 font-medium text-sm" htmlFor="role">
+                    Role
+                  </label>
+                  <select
+                    id="role"
+                    className="w-full p-3 border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                    value={role}
+                    onChange={(e) => setRole(e.target.value)}
+                    required
+                  >
+                    <option value="PATIENT">Patient</option>
+                    <option value="DOCTOR">Doctor</option>
+                  </select>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 px-4 rounded-lg hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 transition duration-200 font-medium shadow-md"
+                  disabled={loading}
                 >
-                  <option value="PATIENT">Patient</option>
-                  <option value="DOCTOR">Doctor</option>
-                </select>
-              </div>
+                  {loading ? 'Creating account…' : 'Create account'}
+                </button>
+              </form>
 
-              <button
-                type="submit"
-                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 px-4 rounded-lg hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 transition duration-200 mb-4 font-medium shadow-md"
-                disabled={loading}
-              >
-                {loading ? 'Creating account...' : 'Register'}
-              </button>
-
-              <div className="text-center">
-                <p className="text-purple-600">
-                  Already have an account?{' '}
-                  <Link href="/login" className="text-indigo-600 hover:text-indigo-700 font-medium">
-                    Login here
-                  </Link>
-                </p>
-              </div>
-            </form>
+              <p className="text-center text-purple-600 mt-5 text-sm">
+                Already have an account?{' '}
+                <Link href="/login" className="text-indigo-600 hover:text-indigo-700 font-medium">
+                  Sign in
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
       </div>
     </div>
   )
-} 
+}

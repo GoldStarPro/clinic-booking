@@ -15,6 +15,7 @@ clinic-booking/
 │   ├── lib/                      ← Thư viện tiện ích (utilities)
 │   └── middleware.ts             ← Chạy trước MỌI request
 │
+├── prisma.config.ts              ← Cấu hình Prisma CLI (schema + seed)
 ├── prisma/                       ← Cấu hình ORM Prisma
 │   ├── schema.prisma             ← Định nghĩa cấu trúc database
 │   ├── seed.ts                   ← Tạo dữ liệu mẫu
@@ -171,9 +172,12 @@ Hãy nghĩ middleware như người bảo vệ ở cửa — mọi người đ�
 
 ---
 
-## Chi Tiết: `prisma/` — Database Schema
+## Chi Tiết: `prisma.config.ts` + `prisma/` — Database Schema
+
+`prisma.config.ts` (root) là chỗ Prisma CLI đọc **đường dẫn schema, migrations, và lệnh seed**. Không dùng `package.json#prisma` nữa (deprecated, sẽ gỡ ở Prisma 7). File này `import 'dotenv/config'` vì khi có config thì Prisma **không** tự load `.env`. Connection URL vẫn nằm trong `schema.prisma` (`DATABASE_URL` / `DIRECT_URL`) — chuyển URL sang config là breaking của Prisma 7, project này giữ Prisma 6.
 
 ```
+prisma.config.ts        ← CLI config: schema + migrations.seed
 prisma/
 ├── schema.prisma       ← Khai báo models (bảng), relations, enums
 ├── seed.ts             ← Script tạo dữ liệu mẫu khi dev
@@ -220,7 +224,7 @@ Prisma tạo bảng; file canonical gắn RLS + grants + khoá `_prisma_migratio
     "dev": "next dev",                          // Chạy dev server
     "build": "prisma generate && next build",  // Build production
     "start": "next start",                     // Chạy production server
-    "seed": "ts-node prisma/seed.ts",          // Tạo dữ liệu mẫu
+    "seed": "prisma db seed",                  // Seed qua prisma.config.ts
     "security-check": "node scripts/security-check.js"  // Kiểm tra bảo mật
   }
 }

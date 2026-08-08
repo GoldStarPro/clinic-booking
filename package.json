@@ -7,13 +7,10 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "seed": "ts-node prisma/seed.ts",
+    "seed": "prisma db seed",
     "security-check": "node scripts/security-check.js && node scripts/supabase-security-lint.js",
     "security-lint:sql": "node scripts/supabase-security-lint.js",
     "audit": "npm audit --omit=dev"
-  },
-  "prisma": {
-    "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.7.0",
@@ -29,6 +26,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "autoprefixer": "^10.4.21",
+    "dotenv": "^16.6.1",
     "eslint": "^8",
     "eslint-config-next": "^15.5.23",
     "postcss": "^8.5.26",
