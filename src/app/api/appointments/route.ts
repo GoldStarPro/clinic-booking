@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
 import { checkRateLimit, getClientIP, validateAppointmentData } from '@/lib/security'
+import { createSupabaseRouteClient } from '@/lib/supabase-route'
 
 // List appointments for the signed-in patient or doctor
 export async function GET(request: Request) {
@@ -15,7 +14,7 @@ export async function GET(request: Request) {
       )
     }
 
-    const supabase = createRouteHandlerClient({ cookies })
+    const supabase = await createSupabaseRouteClient()
     
     // Get the current user
     const { data: { user } } = await supabase.auth.getUser()
@@ -72,7 +71,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const supabase = createRouteHandlerClient({ cookies })
+    const supabase = await createSupabaseRouteClient()
     
     // Get the current user
     const { data: { user } } = await supabase.auth.getUser()

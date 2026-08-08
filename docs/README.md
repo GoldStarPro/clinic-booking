@@ -82,7 +82,7 @@ Nếu bạn là người mới, hãy đọc **tuần tự từ trên xuống dư
 | # | Tài liệu | Mô tả | Thời gian |
 |---|----------|-------|-----------|
 | 17 | [⚖️ So Sánh Kiến Trúc](./architecture-comparison/monolith-vs-separated.md) | **Fullstack vs BE/FE riêng: lợi hại thế nào?** | 20 phút |
-| 18 | [📈 Lộ Trình Nâng Cấp](./architecture-comparison/upgrade-roadmap.md) | Các hướng mở rộng để đúng chuẩn production | 20 phút |
+| 18 | [📈 Lộ Trình Nâng Cấp](./architecture-comparison/upgrade-roadmap.md) | MVP dừng ở đây + schema HIS/EMR (§ 2.5) + Redis/Zod/CI | 20 phút |
 | 19 | [🔨 Tự Xây Dự Án Tương Tự](./getting-started/build-from-scratch.md) | Step-by-step xây dự án clinic từ đầu | 20 phút |
 
 ---
@@ -100,6 +100,7 @@ Nếu bạn là người mới, hãy đọc **tuần tự từ trên xuống dư
 | "Middleware làm gì?" | [🔐 Luồng Xác Thực](./auth-and-authorization/authentication-flow.md) |
 | "FE tách riêng thì làm thế nào?" | [⚖️ So Sánh Kiến Trúc](./architecture-comparison/monolith-vs-separated.md) |
 | "Muốn xây project tương tự từ đầu" | [🔨 Tự Xây Dự Án Tương Tự](./getting-started/build-from-scratch.md) |
+| "Schema 2 bảng có đủ cho bệnh viện không?" | [📈 Lộ Trình Nâng Cấp § 2.5](./architecture-comparison/upgrade-roadmap.md) |
 
 ---
 

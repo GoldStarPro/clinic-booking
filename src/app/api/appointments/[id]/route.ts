@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
 import { checkRateLimit, getClientIP, isValidUUID } from '@/lib/security'
+import { createSupabaseRouteClient } from '@/lib/supabase-route'
 
 // Patient updates their own appointment status (e.g. cancel)
 export async function PATCH(
@@ -28,7 +27,7 @@ export async function PATCH(
       )
     }
 
-    const supabase = createRouteHandlerClient({ cookies })
+    const supabase = await createSupabaseRouteClient()
     
     // Get the current user
     const { data: { user } } = await supabase.auth.getUser()

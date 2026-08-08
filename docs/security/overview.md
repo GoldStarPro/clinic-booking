@@ -220,10 +220,10 @@ if (req.nextUrl.pathname.startsWith('/api')) {
 ```env
 # Public (safe to expose to browser)
 NEXT_PUBLIC_SUPABASE_URL=...
-NEXT_PUBLIC_SUPABASE_ANON_KEY=...   # Anon key - giới hạn bởi RLS
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...   # sb_publishable_... — giới hạn bởi RLS
 
 # Private (NEVER expose to browser!)
-SUPABASE_SERVICE_ROLE_KEY=...       # Bypass mọi RLS - cực kỳ nguy hiểm nếu lộ
+SUPABASE_SERVICE_ROLE_KEY=...       # sb_secret_... — bypass RLS; chỉ server
 DATABASE_URL=...                     # Kết nối trực tiếp database
 DIRECT_URL=...
 ```

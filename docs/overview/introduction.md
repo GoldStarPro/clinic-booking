@@ -6,7 +6,7 @@
 
 ## 1. Dự Án Này Là Gì?
 
-**Clinic Booking** là một hệ thống đặt lịch khám bệnh trực tuyến. Tưởng tượng bạn muốn đặt lịch gặp bác sĩ mà không cần gọi điện hay xếp hàng — đó chính xác là vấn đề project này giải quyết.
+**Clinic Booking** là một hệ thống đặt lịch khám bệnh trực tuyến (MVP **học fullstack**, không phải HIS bệnh viện). Tưởng tượng bạn muốn đặt lịch gặp bác sĩ mà không cần gọi điện hay xếp hàng — đó chính xác là vấn đề project này giải quyết. Schema 2 bảng cố ý tối giản; hướng EMR → [Lộ trình nâng cấp § 2.5](../architecture-comparison/upgrade-roadmap.md).
 
 ### Tóm tắt bằng 1 câu:
 > *"Một ứng dụng web cho phép bệnh nhân đặt lịch khám, bác sĩ quản lý lịch hẹn, và admin kiểm soát toàn hệ thống."*

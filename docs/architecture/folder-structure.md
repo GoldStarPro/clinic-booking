@@ -100,13 +100,15 @@ src/app/
     │   └── [id]/
     │       └── route.ts      ← PATCH /api/appointments/:id
     ├── admin/
-    │   └── appointments/
-    │       └── [id]/
-    │           └── route.ts  ← DELETE /api/admin/appointments/:id
+    │   ├── appointments/
+    │   │   └── [id]/
+    │   │       └── route.ts  ← DELETE /api/admin/appointments/:id
+    │   └── users/
+    │       └── route.ts      ← POST /api/admin/users (Auth Admin + Prisma)
     ├── doctors/
     │   └── route.ts          ← GET /api/doctors
     └── users/
-        └── route.ts          ← POST /api/users
+        └── route.ts          ← POST /api/users (legacy profile helper)
 ```
 
 ### Hiểu Dynamic Routes
@@ -123,6 +125,8 @@ admin/users/[id]/page.tsx  →  /admin/users/abc123
 
 ```
 src/components/
+├── DashboardShell.tsx      ← Sidebar + header + profile (Admin/Doctor/Patient)
+├── HydrationGate.tsx       ← Tránh lệch hydration do browser extension
 ├── ThemeProvider.tsx       ← Context Provider quản lý theme toàn app
 ├── ThemeSwitcher.tsx       ← Auto-switch theme dựa theo URL hiện tại
 ├── HeroSection.tsx         ← Banner/Hero ở đầu các trang dashboard
@@ -140,10 +144,14 @@ src/components/
 
 ```
 src/lib/
-├── supabase.ts     ← Khởi tạo Supabase client (singleton)
-├── security.ts     ← Rate limiting, validation, sanitization
-├── date-utils.ts   ← Format ngày tháng nhất quán
-└── theme.ts        ← Định nghĩa màu sắc cho 3 themes
+├── prisma.ts           ← Prisma Client singleton
+├── supabase.ts         ← Supabase browser/anon client
+├── supabase-admin.ts   ← Service role client (server only)
+├── supabase-route.ts   ← Route handler client (await cookies())
+├── security.ts         ← Rate limiting, validation, sanitization
+├── specialties.ts      ← Danh sách chuyên khoa bác sĩ
+├── date-utils.ts       ← Format ngày tháng nhất quán
+└── theme.ts            ← Định nghĩa màu sắc cho 3 themes
 ```
 
 **Quy tắc:** Code không phải UI, không phải API logic → đặt vào đây để tái sử dụng.
@@ -224,7 +232,7 @@ Prisma tạo bảng; file canonical gắn RLS + grants + khoá `_prisma_migratio
     "dev": "next dev",                          // Chạy dev server
     "build": "prisma generate && next build",  // Build production
     "start": "next start",                     // Chạy production server
-    "seed": "prisma db seed",                  // Seed qua prisma.config.ts
+    "seed": "prisma db seed",                  // Seed via prisma.config.ts
     "security-check": "node scripts/security-check.js"  // Kiểm tra bảo mật
   }
 }

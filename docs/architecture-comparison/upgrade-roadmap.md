@@ -121,25 +121,21 @@ if (!result.success) {
 
 ---
 
-### 1.5 Database Connection Tốt Hơn (Prisma Singleton)
+### 1.5 Database Connection Tốt Hơn (Prisma Singleton) — ✅ Đã làm
 
-**Vấn đề:** Mỗi API route import tạo PrismaClient mới → waste connections.
+`src/lib/prisma.ts` là singleton. Admin create-user (`POST /api/admin/users`) đã dùng `import { prisma } from '@/lib/prisma'`. Các route Prisma cũ (`/api/doctors`, `/api/users`) vẫn tự `new PrismaClient()` — khi quay lại, chuyển hết sang singleton.
 
-```typescript
-// lib/prisma.ts — Singleton pattern
-import { PrismaClient } from '@prisma/client'
+---
 
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
+## Mốc học tập hiện tại (dừng ở đây)
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient()
+Clinic Booking là **project học fullstack** (Next.js + Supabase Auth + Prisma + RLS), không phải HIS/EMR bệnh viện.
 
-if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.prisma = prisma
-}
+Schema hiện tại cố ý **tối giản**: một bảng `User` (PATIENT / DOCTOR / ADMIN, bác sĩ dùng `specialty` nullable) + một bảng `Appointment` (date, time, status, symptoms, notes). Đủ để học Auth, RBAC, RLS, seed, admin tạo user, booking.
 
-// Dùng trong mọi nơi:
-import { prisma } from '@/lib/prisma'
-```
+**Không mở rộng schema lâm sàng trong repo này** trừ khi bắt đầu phase sản phẩm thật. Chi tiết chuẩn doanh nghiệp → mục **2.5** dưới đây.
+
+Đã có trong MVP (2026): landing `/`, `DashboardShell` theo role, `POST /api/admin/users` (Auth Admin API + Prisma, không `signUp` trên browser), `prisma.config.ts`, key Supabase `sb_publishable_` / `sb_secret_`, RLS canonical, Dependabot + security workflows.
 
 ---
 
@@ -231,6 +227,40 @@ const doctors = await prisma.user.findMany({
   orderBy: { name: 'asc' }
 })
 ```
+
+---
+
+### 2.5 Schema y tế chuẩn doanh nghiệp (khi làm sản phẩm thật)
+
+Bảng `User` + `Appointment` **không** đủ HIS/EMR (HIPAA/GDPR, bảo hiểm, đơn thuốc, bệnh án). Hướng tách khi nâng cấp:
+
+```
+auth.users (Supabase)          ← chỉ identity + password
+        │ id
+        ▼
+Staff / Practitioner           ← bác sĩ, y tá, lễ tân (license, specialty, khoa)
+Patient                        ← hồ sơ bệnh nhân (DOB, sex, BHXH, dị ứng)
+ClinicLocation / Room          ← chi nhánh, phòng khám
+ScheduleSlot                   ← slot lịch (thay vì date+time string tự do)
+Appointment                    ← FK patient + practitioner + slot + location
+Encounter / Visit              ← lần khám thật (sau khi appointment CONFIRMED)
+ClinicalNote (SOAP)            ← bệnh án, versioning
+Diagnosis (ICD-10/ICD-11)      ← chẩn đoán
+Medication / Prescription      ← đơn thuốc
+LabOrder / LabResult           ← xét nghiệm
+Consent / InsurancePolicy      ← đồng ý điều trị, bảo hiểm
+AuditLog                       ← ai xem/sửa gì (bắt buộc nếu go-live)
+```
+
+Gợi ý thứ tự:
+
+1. **Tách profile:** `Patient` và `Practitioner` khỏi `User` (User chỉ còn `id` + `role` + email mirror).
+2. **Slot lịch:** `ScheduleSlot` (start/end timestamptz, timezone) — hết cột `time` string.
+3. **Encounter** sau appointment; note lâm sàng không nhét vào `Appointment.notes`.
+4. **AuditLog** + soft-delete trước khi lưu PHI thật.
+5. Cân nhắc FHIR R4 (`Patient`, `Appointment`, `Encounter`, `MedicationRequest`) nếu cần interop.
+
+Công cụ: Prisma multi-schema hoặc migrate dần; RLS theo `patient_id` / `practitioner_id` / `clinic_id`, không `USING (true)`.
 
 ---
 
@@ -357,7 +387,8 @@ try {
 |----------|-----------|--------|-----------|
 | Redis rate limiting | Cao | Thấp | 2 giờ |
 | Zod validation | Cao | Thấp | 4 giờ |
-| Prisma singleton | Cao | Thấp | 30 phút |
+| Prisma singleton | Cao | Thấp | ✅ `src/lib/prisma.ts` |
+| Schema HIS/EMR (2.5) | Thấp (học tập) | Cao | Khi làm sản phẩm thật |
 | Email notifications | Trung | Trung | 1 ngày |
 | Realtime updates | Trung | Trung | 1 ngày |
 | Image upload | Thấp | Trung | 4 giờ |

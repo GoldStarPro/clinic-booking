@@ -26,7 +26,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [theme, setThemeState] = useState<ThemeType>('patient');
   const [mounted, setMounted] = useState(false);
-  const isPublic = PUBLIC_PATHS.includes(pathname);
+  // usePathname() can be empty on the first client pass — treat as public
+  // so SSR and hydration both use a transparent background (no gradient flash).
+  const isPublic = !pathname || PUBLIC_PATHS.includes(pathname);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as ThemeType;
@@ -46,11 +48,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const colors = themes[theme];
 
   const getBackgroundStyle = (): React.CSSProperties => {
-    if (isPublic) {
+    if (!mounted || isPublic) {
       return { backgroundColor: 'transparent' };
-    }
-    if (!mounted) {
-      return { backgroundColor: themes.patient.background };
     }
 
     switch (theme) {
@@ -111,7 +110,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         }}
         suppressHydrationWarning
       >
-        {!isPublic && (
+        {mounted && !isPublic && (
           <style jsx global>{`
             :root {
               --primary-color: ${colors.primary};

@@ -2,14 +2,14 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import Link from 'next/link'
+import { DOCTOR_SPECIALTIES } from '@/lib/specialties'
 
 export default function CreateUser() {
   const router = useRouter()
-  const supabase = createClientComponentClient()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -17,14 +17,15 @@ export default function CreateUser() {
     role: 'PATIENT',
     specialty: '',
     phone: '',
-    address: ''
+    address: '',
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
+      ...(name === 'role' && value !== 'DOCTOR' ? { specialty: '' } : {}),
     }))
   }
 
@@ -34,44 +35,31 @@ export default function CreateUser() {
     setError('')
 
     try {
-      // First create the auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      // Server Admin API — does not call signUp, so the admin session stays intact
+      console.log('Submitting admin create-user', {
         email: formData.email,
-        password: formData.password,
+        role: formData.role,
+        specialty: formData.specialty || undefined,
       })
 
-      if (authError) {
-        throw new Error(authError.message)
+      const response = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
+
+      const payload = await response.json().catch(() => ({}))
+
+      if (!response.ok) {
+        throw new Error(payload.error || 'Failed to create user')
       }
 
-      if (!authData.user) {
-        throw new Error('Failed to create user')
-      }
-
-      // Then create the user profile
-      const { error: profileError } = await supabase
-        .from('User')
-        .insert({
-          id: authData.user.id,
-          email: formData.email,
-          name: formData.name,
-          role: formData.role,
-          specialty: formData.role === 'DOCTOR' ? formData.specialty : null,
-          phone: formData.phone,
-          address: formData.address,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        })
-
-      if (profileError) {
-        throw new Error(profileError.message)
-      }
-
-      // Redirect to users list after successful creation
+      console.log('User created:', payload.user?.id, payload.user?.role)
       router.push('/admin/users')
-    } catch (error) {
-      console.error('Error creating user:', error)
-      setError(error instanceof Error ? error.message : 'Failed to create user')
+      router.refresh()
+    } catch (err) {
+      console.error('Error creating user:', err)
+      setError(err instanceof Error ? err.message : 'Failed to create user')
     } finally {
       setLoading(false)
     }
@@ -96,7 +84,7 @@ export default function CreateUser() {
       )}
 
       <div className="bg-white p-6 rounded-lg shadow-md">
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-gray-700 mb-2" htmlFor="email">
@@ -107,9 +95,11 @@ export default function CreateUser() {
                 id="email"
                 name="email"
                 required
+                autoComplete="off"
                 className="w-full p-2 border border-gray-300 rounded"
                 value={formData.email}
                 onChange={handleChange}
+                suppressHydrationWarning
               />
             </div>
 
@@ -117,15 +107,29 @@ export default function CreateUser() {
               <label className="block text-gray-700 mb-2" htmlFor="password">
                 Password
               </label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                required
-                className="w-full p-2 border border-gray-300 rounded"
-                value={formData.password}
-                onChange={handleChange}
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  id="password"
+                  name="password"
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                  className="w-full p-2 pr-16 border border-gray-300 rounded"
+                  value={formData.password}
+                  onChange={handleChange}
+                  suppressHydrationWarning
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute inset-y-0 right-0 px-3 text-sm text-gray-600 hover:text-gray-900"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? 'Hide' : 'Show'}
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Minimum 8 characters</p>
             </div>
 
             <div>
@@ -137,9 +141,11 @@ export default function CreateUser() {
                 id="name"
                 name="name"
                 required
+                minLength={2}
                 className="w-full p-2 border border-gray-300 rounded"
                 value={formData.name}
                 onChange={handleChange}
+                suppressHydrationWarning
               />
             </div>
 
@@ -166,15 +172,21 @@ export default function CreateUser() {
                 <label className="block text-gray-700 mb-2" htmlFor="specialty">
                   Specialty
                 </label>
-                <input
-                  type="text"
+                <select
                   id="specialty"
                   name="specialty"
                   required
                   className="w-full p-2 border border-gray-300 rounded"
                   value={formData.specialty}
                   onChange={handleChange}
-                />
+                >
+                  <option value="">Select specialty</option>
+                  {DOCTOR_SPECIALTIES.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
               </div>
             )}
 
@@ -189,6 +201,7 @@ export default function CreateUser() {
                 className="w-full p-2 border border-gray-300 rounded"
                 value={formData.phone}
                 onChange={handleChange}
+                suppressHydrationWarning
               />
             </div>
 
@@ -203,6 +216,7 @@ export default function CreateUser() {
                 className="w-full p-2 border border-gray-300 rounded"
                 value={formData.address}
                 onChange={handleChange}
+                suppressHydrationWarning
               />
             </div>
           </div>
@@ -220,4 +234,4 @@ export default function CreateUser() {
       </div>
     </div>
   )
-} 
+}

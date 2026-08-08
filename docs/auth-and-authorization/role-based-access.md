@@ -45,7 +45,8 @@ Người dùng → Được gán Vai trò → Vai trò có Quyền hạn
 | `/api/appointments` | POST | ✅ | ❌ | ✅ |
 | `/api/appointments/[id]` | PATCH | ✅ (chỉ của mình) | ✅ (chỉ của mình) | ✅ |
 | `/api/admin/appointments/[id]` | DELETE | ❌ | ❌ | ✅ |
-| `/api/users` | POST | ❌ | ❌ | ✅ |
+| `/api/admin/users` | POST | ❌ | ❌ | ✅ |
+| `/api/users` | POST | ❌ | ❌ | ✅ (legacy) |
 
 ### Thao Tác Với Lịch Hẹn
 
