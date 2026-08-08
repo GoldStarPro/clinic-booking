@@ -4,6 +4,7 @@ import { use, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import Link from 'next/link'
+import { DOCTOR_SPECIALTIES } from '@/lib/specialties'
 
 interface User {
   id: string
@@ -204,15 +205,25 @@ export default function EditUser({ params }: { params: Promise<{ id: string }> }
                 <label className="block text-gray-700 mb-2" htmlFor="specialty">
                   Specialty
                 </label>
-                <input
-                  type="text"
+                <select
                   id="specialty"
                   name="specialty"
                   required
                   className="w-full p-2 border border-gray-300 rounded"
-                  value={formData.specialty}
+                  value={formData.specialty || ''}
                   onChange={handleChange}
-                />
+                >
+                  <option value="">Select specialty</option>
+                  {formData.specialty &&
+                    !(DOCTOR_SPECIALTIES as readonly string[]).includes(formData.specialty) && (
+                      <option value={formData.specialty}>{formData.specialty}</option>
+                    )}
+                  {DOCTOR_SPECIALTIES.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
               </div>
             )}
 

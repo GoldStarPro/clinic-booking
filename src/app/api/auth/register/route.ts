@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
 import { checkRateLimit, getClientIP, validateRegistrationData } from '@/lib/security'
+import { createSupabaseRouteClient } from '@/lib/supabase-route'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,7 +28,7 @@ export async function POST(request: Request) {
     }
 
     const { email, password, name, phone, address } = validation.sanitized!
-    const supabase = createRouteHandlerClient({ cookies })
+    const supabase = await createSupabaseRouteClient()
 
     // Create Auth user first; public.User uses the same id
     console.log('Attempting to sign up with Supabase:', email)

@@ -101,38 +101,18 @@ export async function DELETE(req: NextRequest, { params }) {
 - Nút Sửa, Xóa
 
 ### Tạo user mới (`/admin/users/create`):
-Admin có thể tạo tài khoản cho:
-- Bác sĩ mới (role = DOCTOR, điền specialty)
-- Bệnh nhân
-- Admin khác
+Admin tạo Patient / Doctor / Admin **mà không** gọi `signUp` trên browser (tránh cướp session). Form: dropdown specialty (Doctor), Show/Hide password.
 
 ### API tạo user:
 ```typescript
-// POST /api/users
-export async function POST(req: NextRequest) {
-  const body = await req.json()
-  
-  // Tạo auth user trên Supabase
-  const { data: authData } = await supabaseAdmin.auth.admin.createUser({
-    email: body.email,
-    password: body.password,
-    email_confirm: true
-  })
-
-  // Tạo profile trong database
-  const user = await prisma.user.create({
-    data: {
-      id: authData.user.id,
-      email: body.email,
-      name: body.name,
-      role: body.role,
-      specialty: body.specialty || null,
-    }
-  })
-
-  return NextResponse.json(user)
-}
+// POST /api/admin/users  (chỉ ADMIN, cookie session)
+// 1. getUser() từ cookie — role phải là ADMIN
+// 2. auth.admin.createUser({ email, password, email_confirm: true })  // service role
+// 3. prisma.user.create({ id, email, name, role, specialty, ... })
+// 4. Nếu bước 3 fail → deleteUser(id) để không để Auth mồ côi
 ```
+
+**Không dùng** `supabase.auth.signUp()` trong trang admin — `signUp` đổi cookie sang user mới.
 
 ### Sửa user (`/admin/users/[id]`):
 Admin có thể sửa: tên, role, chuyên khoa, số điện thoại, địa chỉ, mô tả.

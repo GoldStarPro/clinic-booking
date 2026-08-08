@@ -9,6 +9,7 @@ export default function Register() {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
@@ -65,7 +66,7 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-400 via-purple-500 to-pink-400">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-400 via-purple-500 to-pink-400" suppressHydrationWarning>
       <div className="min-h-screen grid lg:grid-cols-2">
         <aside className="hidden lg:flex flex-col justify-between p-12 text-white relative overflow-hidden">
           <div className="absolute inset-0 bg-black/20" aria-hidden />
@@ -146,16 +147,27 @@ export default function Register() {
                   <label className="block text-indigo-700 mb-1.5 font-medium text-sm" htmlFor="password">
                     Password
                   </label>
-                  <input
-                    type="password"
-                    id="password"
-                    className="w-full p-3 border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={8}
-                    placeholder="At least 8 characters"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      id="password"
+                      className="w-full p-3 pr-16 border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      minLength={8}
+                      placeholder="At least 8 characters"
+                      suppressHydrationWarning
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      className="absolute inset-y-0 right-0 px-3 text-sm text-indigo-600 hover:text-indigo-800"
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showPassword ? 'Hide' : 'Show'}
+                    </button>
+                  </div>
                 </div>
 
                 <div>

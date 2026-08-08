@@ -183,11 +183,11 @@ Trong `.env`:
 ```env
 # Pooled connection (dùng connection pooler của Supabase)
 # Phù hợp cho Serverless (Vercel) - nhiều requests, connection được tái dùng
-DATABASE_URL="postgresql://postgres.xxxxx:[password]@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
+DATABASE_URL="postgresql://postgres.xxxxx:[password]@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
 
 # Direct connection (kết nối thẳng không qua pooler)
 # Dùng cho prisma migrate (cần persistent connection)
-DIRECT_URL="postgresql://postgres.xxxxx:[password]@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres"
+DIRECT_URL="postgresql://postgres.xxxxx:[password]@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres"
 ```
 
 ```prisma

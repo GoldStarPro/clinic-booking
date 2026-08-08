@@ -15,14 +15,14 @@
 # Lấy từ: Supabase Dashboard → Settings → API → Project URL
 NEXT_PUBLIC_SUPABASE_URL=https://xxxxxxxxxxxxx.supabase.co
 
-# Public anonymous key (an toàn để expose ra browser)
-# Lấy từ: Supabase Dashboard → Settings → API → anon/public key
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+# Publishable key (an toàn để expose ra browser). Giữ tên biến ANON_KEY trong code.
+# Lấy từ: Settings → API Keys → Publishable (`sb_publishable_...`)
+# Legacy JWT `anon` (`eyJ...`) vẫn chạy song song đến khi tắt.
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_...
 
-# Service role key (NGUY HIỂM - chỉ dùng server-side!)
-# Bypass mọi RLS policies
-# Lấy từ: Supabase Dashboard → Settings → API → service_role key
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+# Secret / service role (NGUY HIỂM - chỉ server-side!). Bypass RLS.
+# Lấy từ: Settings → API Keys → Secret (`sb_secret_...`). Local dùng key `default`, Vercel dùng `vercel_production`.
+SUPABASE_SERVICE_ROLE_KEY=sb_secret_...
 
 # ================================
 # DATABASE CONNECTION
@@ -40,8 +40,8 @@ DIRECT_URL="postgresql://postgres.xxxxx:[YOUR-PASSWORD]@aws-0-ap-southeast-1.poo
 # APP CONFIGURATION
 # ================================
 
-# URL production của app (dùng cho CORS whitelist)
-NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
+# URL app (CORS whitelist). Local: http://localhost:3000 — Production: https://cbs.goldhoang.dev
+NEXT_PUBLIC_APP_URL=https://cbs.goldhoang.dev
 ```
 
 ---
@@ -61,16 +61,16 @@ Ví dụ: https://abcdefghij.supabase.co
 ```
 Loại: Public (NEXT_PUBLIC_ prefix)
 Dùng ở: Cả client và server
-Mô tả: Key để client gọi Supabase, bị giới hạn bởi RLS
-Lưu ý: Okay để expose vì RLS sẽ bảo vệ data
+Mô tả: Publishable key (`sb_publishable_...`) — vẫn giữ tên biến ANON_KEY trong code
+Lưu ý: Giới hạn bởi RLS. Tab Legacy JWT `anon` (`eyJ...`) chỉ để rollback.
 ```
 
 ### `SUPABASE_SERVICE_ROLE_KEY`
 ```
 Loại: Private (KHÔNG có NEXT_PUBLIC_)
-Dùng ở: CHỈ server-side (API routes, server components)
-Mô tả: Key admin, bypass MỌI RLS policy
-⚠️ NGUY HIỂM: Nếu lộ ra ngoài, ai cũng có thể đọc/ghi/xóa mọi data!
+Dùng ở: CHỈ server-side (seed, POST /api/admin/users, Prisma admin)
+Mô tả: Secret key `sb_secret_...` (bypass RLS). Local = key tên default; Vercel = vercel_production.
+⚠️ NGUY HIỂM: Không bao giờ đưa vào Client Component / NEXT_PUBLIC_
 ```
 
 ### `DATABASE_URL`

@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createSupabaseRouteClient } from '@/lib/supabase-route'
 
 export async function DELETE(
   request: Request,
@@ -10,7 +9,7 @@ export async function DELETE(
     const { id } = await params
     console.log('Starting delete process for appointment:', id)
 
-    const supabase = createRouteHandlerClient({ cookies })
+    const supabase = await createSupabaseRouteClient()
 
     const { data: { user }, error: userError } = await supabase.auth.getUser()
 

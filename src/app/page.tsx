@@ -38,7 +38,10 @@ const team = [
 
 export default function LandingPage() {
   return (
-    <div className={`${display.variable} ${sans.variable} clinic-landing min-h-screen text-slate-900`}>
+    <div
+      className={`${display.variable} ${sans.variable} clinic-landing min-h-screen text-slate-900`}
+      suppressHydrationWarning
+    >
       <header className="clinic-nav">
         <div className="clinic-shell clinic-nav-inner">
           <Link href="/" className="clinic-brand">

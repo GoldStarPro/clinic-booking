@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { HydrationGate } from '@/components/HydrationGate';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -12,9 +13,13 @@ export const metadata: Metadata = {
   },
   description: "Book your medical appointments online",
   icons: {
-    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
-    shortcut: "/favicon.svg",
-    apple: "/favicon.svg",
+    icon: [
+      { url: "/favicon.ico", sizes: "48x48" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: "/apple-icon.png",
   },
 };
 
@@ -28,7 +33,7 @@ export default function RootLayout({
       <body className={inter.className} suppressHydrationWarning>
         <ThemeProvider>
           <main className="min-h-screen" suppressHydrationWarning>
-            {children}
+            <HydrationGate>{children}</HydrationGate>
           </main>
         </ThemeProvider>
       </body>

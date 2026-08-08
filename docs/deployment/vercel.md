@@ -146,12 +146,14 @@ Trong Vercel Dashboard → Settings → Environment Variables:
 
 ```
 NEXT_PUBLIC_SUPABASE_URL      = https://xxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY = eyJ...
-SUPABASE_SERVICE_ROLE_KEY     = eyJ...
-DATABASE_URL                  = postgresql://...?pgbouncer=true
-DIRECT_URL                    = postgresql://...
-NEXT_PUBLIC_APP_URL           = https://clinic-booking.vercel.app
+NEXT_PUBLIC_SUPABASE_ANON_KEY = sb_publishable_...
+SUPABASE_SERVICE_ROLE_KEY     = sb_secret_...          # secret key vercel_production
+DATABASE_URL                  = postgresql://...:6543/postgres?pgbouncer=true
+DIRECT_URL                    = postgresql://...:5432/postgres
+NEXT_PUBLIC_APP_URL           = https://cbs.goldhoang.dev
 ```
+
+Sau khi đổi `NEXT_PUBLIC_*` phải **Redeploy**. `DATABASE_URL` phải là `postgresql://`, không phải `sb_`.
 
 ### Bước 4: Deploy
 Click "Deploy" → Vercel tự build và deploy.

@@ -36,7 +36,7 @@
 
 ## 1. Next.js 15 — Framework Chính
 
-**Phiên bản:** 15.5.12  
+**Phiên bản:** 15.5.23  
 **Website:** https://nextjs.org
 
 ### Next.js là gì?
@@ -262,13 +262,13 @@ Vercel là nền tảng deploy ứng dụng web, được tạo ra bởi cùng t
 ```json
 {
   "dependencies": {
-    "next": "15.5.12",
+    "next": "15.5.23",
     "react": "^19",
     "react-dom": "^19",
     "@prisma/client": "^6.19.0",
     "@supabase/auth-helpers-nextjs": "^0.10.0",
-    "@supabase/supabase-js": "^2.45.0",
-    "uuid": "^9.0.1"
+    "@supabase/supabase-js": "^2.96.0",
+    "uuid": "^11.1.1"
   },
   "devDependencies": {
     "prisma": "^6.19.0",

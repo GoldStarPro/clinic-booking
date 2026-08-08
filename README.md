@@ -46,10 +46,10 @@ npm install
 ### 3. Supabase project & Auth
 
 1. Create a new project on [Supabase](https://supabase.com) (or reuse an existing one).
-2. Go to **Project Settings → API** and copy:
+2. Go to **Project Settings → API Keys**:
    - **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`
-   - **anon / public** key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - **service_role** key → `SUPABASE_SERVICE_ROLE_KEY` (server/seed only — never expose to the browser)
+   - **Publishable** (`sb_publishable_...`) → `NEXT_PUBLIC_SUPABASE_ANON_KEY` (variable name unchanged)
+   - **Secret** (`sb_secret_...`) → `SUPABASE_SERVICE_ROLE_KEY` (server/seed / admin create-user only — never expose to the browser)
 3. Go to **Project Settings → Database** and copy connection strings:
    - **Connection pooling (Transaction / port 6543)** → `DATABASE_URL`  
      Append `?pgbouncer=true` if it is not already present.
@@ -75,8 +75,8 @@ Update `.env`:
 | Variable | Where to get it | Notes |
 |----------|-----------------|--------|
 | `NEXT_PUBLIC_SUPABASE_URL` | Settings → API → Project URL | Public |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Settings → API → `anon` `public` | Public; limited by RLS |
-| `SUPABASE_SERVICE_ROLE_KEY` | Settings → API → `service_role` | **Secret.** Required for `npm run seed` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | API Keys → Publishable `sb_publishable_...` | Public; limited by RLS |
+| `SUPABASE_SERVICE_ROLE_KEY` | API Keys → Secret `sb_secret_...` | **Secret.** Seed + `POST /api/admin/users` |
 | `DATABASE_URL` | Settings → Database → pooling URI | Prisma queries (PgBouncer) |
 | `DIRECT_URL` | Settings → Database → direct URI | Prisma migrate |
 | `NEXT_PUBLIC_APP_URL` | Your app origin | Default: `http://localhost:3000` (CORS) |
@@ -261,11 +261,12 @@ clinic-booking/
 - `POST /api/auth/login` - Sign in (Supabase Auth + profile)
 - `POST /api/auth/register` - Register (Auth + `User` row)
 - `GET /api/doctors` - List doctors
-- `GET /api/users` - Create/list users (admin flows)
+- `POST /api/admin/users` - Admin creates Auth + `User` (service role; does not steal session)
+- `GET /api/users` - Legacy profile create helper
 - `GET /api/appointments` - Get user's appointments
 - `POST /api/appointments` - Create new appointment
 - `PATCH /api/appointments/[id]` - Update appointment status
-- `PATCH /api/admin/appointments/[id]` - Admin appointment update
+- `DELETE /api/admin/appointments/[id]` - Admin delete appointment
 
 ## Contributing
 

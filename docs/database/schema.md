@@ -6,7 +6,7 @@
 
 ## 1. Tổng Quan Database
 
-Hệ thống dùng **PostgreSQL** được host trên Supabase. Có **2 bảng chính**:
+Hệ thống dùng **PostgreSQL** được host trên Supabase. Có **2 bảng chính** (MVP học tập — cố ý tối giản, chưa phải HIS bệnh viện):
 
 ```
 ┌──────────────────────────────────────────────┐
@@ -264,6 +264,8 @@ Prisma lưu lịch sử thay đổi database trong `prisma/migrations/`:
 | `20250429142033_remove_doctor_table` | Xóa bảng Doctor riêng, gộp vào bảng User với trường `specialty` |
 
 **Bài học:** Đừng sợ thay đổi schema — Prisma migration giúp thay đổi an toàn và có thể rollback.
+
+Schema 2 bảng là **mốc học tập**. Chuẩn doanh nghiệp y tế (Patient / Practitioner / Encounter / Prescription / AuditLog) → [📈 Lộ Trình Nâng Cấp § 2.5](../architecture-comparison/upgrade-roadmap.md).
 
 ---
 
