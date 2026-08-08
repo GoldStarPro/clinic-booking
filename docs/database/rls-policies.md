@@ -84,7 +84,7 @@ Canonical SQL chạy `DROP EXTENSION IF EXISTS pg_graphql` — app chỉ dùng *
 ```text
 1. npx prisma migrate deploy   # hoặc db push — tạo bảng
 2. SQL Editor → chạy 20260808120000_rls_canonical.sql
-3. npx prisma db seed
+3. npx prisma db seed   # hoặc npm run seed — lệnh seed nằm trong prisma.config.ts
 4. npm run security-check
 ```
 

@@ -184,8 +184,10 @@ Supabase là một **dịch vụ backend hoàn chỉnh** — bạn không cần 
 
 ## 6. Prisma — ORM (Object-Relational Mapping)
 
-**Phiên bản:** 6.7.0  
+**Phiên bản:** 6.19 (ORM 6, không nâng Prisma 7)  
 **Website:** https://prisma.io
+
+CLI đọc `prisma.config.ts` (schema + seed). `DATABASE_URL` / `DIRECT_URL` vẫn trong `schema.prisma`.
 
 ### ORM là gì?
 ORM là công cụ giúp bạn tương tác với database bằng **code** thay vì viết SQL thuần.
@@ -263,13 +265,13 @@ Vercel là nền tảng deploy ứng dụng web, được tạo ra bởi cùng t
     "next": "15.5.12",
     "react": "^19",
     "react-dom": "^19",
-    "@prisma/client": "^6.7.0",
+    "@prisma/client": "^6.19.0",
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/supabase-js": "^2.45.0",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "prisma": "^6.7.0",
+    "prisma": "^6.19.0",
     "typescript": "^5",
     "tailwindcss": "^3.4.17",
     "ts-node": "^10.9.2",

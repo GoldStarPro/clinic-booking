@@ -9,17 +9,16 @@ export async function DELETE(
   try {
     const { id } = await params
     console.log('Starting delete process for appointment:', id)
-    
+
     const supabase = createRouteHandlerClient({ cookies })
-    
-    // Get the current user
+
     const { data: { user }, error: userError } = await supabase.auth.getUser()
-    
+
     if (userError) {
       console.error('Auth error:', userError)
       return NextResponse.json({ error: 'Auth error' }, { status: 401 })
     }
-    
+
     if (!user) {
       console.error('No user found')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -27,7 +26,7 @@ export async function DELETE(
 
     console.log('User authenticated:', user.id)
 
-    // Verify the user is an admin
+    // Only ADMIN may delete any appointment
     const { data: userData, error: roleError } = await supabase
       .from('User')
       .select('role')
@@ -46,8 +45,7 @@ export async function DELETE(
 
     console.log('User is admin, proceeding with deletion')
 
-    // First check if the appointment exists
-    const { data: existingAppointment, error: checkError } = await supabase
+    const { error: checkError } = await supabase
       .from('Appointment')
       .select('*')
       .eq('id', id)
@@ -58,9 +56,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Appointment not found' }, { status: 404 })
     }
 
-    console.log('Appointment exists:', existingAppointment)
+    console.log('Appointment exists, deleting:', id)
 
-    // Delete the appointment using admin privileges
     const { data: deletedAppointment, error: deleteError } = await supabase
       .from('Appointment')
       .delete()
@@ -75,7 +72,7 @@ export async function DELETE(
       )
     }
 
-    console.log('Appointment deleted successfully:', deletedAppointment)
+    console.log('Appointment deleted successfully:', id)
     return NextResponse.json({ success: true, deletedAppointment })
   } catch (error) {
     console.error('Error in delete process:', error)
@@ -84,4 +81,4 @@ export async function DELETE(
       { status: 500 }
     )
   }
-} 
+}

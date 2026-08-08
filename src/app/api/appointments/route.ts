@@ -3,6 +3,7 @@ import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { checkRateLimit, getClientIP, validateAppointmentData } from '@/lib/security'
 
+// List appointments for the signed-in patient or doctor
 export async function GET(request: Request) {
   try {
     // Rate limiting
@@ -47,6 +48,7 @@ export async function GET(request: Request) {
       )
     }
 
+    console.log('Fetched appointments for user:', user.id, 'count:', appointments?.length ?? 0)
     return NextResponse.json(appointments)
   } catch (error) {
     console.error('Error fetching appointments:', error)
@@ -56,6 +58,8 @@ export async function GET(request: Request) {
     )
   }
 }
+
+// Create a new appointment for the signed-in patient
 
 export async function POST(request: Request) {
   try {
@@ -126,6 +130,7 @@ export async function POST(request: Request) {
       )
     }
 
+    console.log('Appointment created:', appointment?.id, 'patient:', user.id, 'doctor:', doctorId)
     return NextResponse.json(appointment)
   } catch (error) {
     console.error('Error creating appointment:', error)

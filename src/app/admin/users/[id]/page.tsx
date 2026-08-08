@@ -78,45 +78,28 @@ export default function EditUser({ params }: { params: Promise<{ id: string }> }
     setError('')
 
     try {
-      // Kiểm tra role của user hiện tại
       const { data: { user }, error: userError } = await supabase.auth.getUser()
       if (userError) throw new Error(userError.message)
 
-      const { data: currentUserData, error: roleError } = await supabase
+      const { error: roleError } = await supabase
         .from('User')
         .select('role')
         .eq('id', user?.id)
         .single()
 
       if (roleError) throw new Error(roleError.message)
-      console.log('Current user role:', currentUserData?.role)
 
-      // Kiểm tra xem có thể truy cập user cần update không
-      const { data: targetUser, error: selectError } = await supabase
+      const { error: selectError } = await supabase
         .from('User')
         .select('*')
         .eq('id', id)
         .single()
 
       if (selectError) {
-        console.error('Error accessing target user:', selectError)
         throw new Error('Cannot access user information')
       }
 
-      console.log('Target user before update:', targetUser)
-
-      // Log thông tin trước khi update
-      console.log('Updating user with data:', {
-        id,
-        name: formData.name,
-        role: formData.role,
-        specialty: formData.role === 'DOCTOR' ? formData.specialty : null,
-        phone: formData.phone,
-        address: formData.address,
-        "updatedAt": new Date().toISOString()
-      })
-
-      const { data: updateData, error } = await supabase
+      const { error } = await supabase
         .from('User')
         .update({
           name: formData.name,
@@ -124,31 +107,16 @@ export default function EditUser({ params }: { params: Promise<{ id: string }> }
           specialty: formData.role === 'DOCTOR' ? formData.specialty : null,
           phone: formData.phone,
           address: formData.address,
-          "updatedAt": new Date().toISOString()
+          updatedAt: new Date().toISOString(),
         })
         .eq('id', id)
 
       if (error) {
-        console.error('Update error:', error)
         throw new Error(error.message)
-      }
-
-      // Kiểm tra lại thông tin sau khi update
-      const { data: updatedUser, error: checkError } = await supabase
-        .from('User')
-        .select('*')
-        .eq('id', id)
-        .single()
-
-      if (checkError) {
-        console.error('Error checking updated user:', checkError)
-      } else {
-        console.log('User after update:', updatedUser)
       }
 
       router.push('/admin/users')
     } catch (error) {
-      console.error('Error updating user:', error)
       setError(error instanceof Error ? error.message : 'Failed to update user')
     } finally {
       setSaving(false)

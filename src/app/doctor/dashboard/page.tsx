@@ -34,52 +34,14 @@ export default function DoctorDashboard() {
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [userRole, setUserRole] = useState('')
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [filterType, setFilterType] = useState('ALL') // ALL, TODAY, WEEK, MONTH
   const [filterStatus, setFilterStatus] = useState('ALL') // ALL, PENDING, CONFIRMED, CANCELLED, COMPLETED
 
   useEffect(() => {
-    checkUserRole()
-  }, [])
-
-  useEffect(() => {
-    if (userRole === 'DOCTOR') {
-      fetchAppointments()
-    }
-  }, [userRole, filterType, filterStatus])
-
-  const checkUserRole = async () => {
-    try {
-      const { data: { user }, error: userError } = await supabase.auth.getUser()
-      
-      if (userError || !user) {
-        router.push('/login')
-        return
-      }
-
-      const { data: userData, error: roleError } = await supabase
-        .from('User')
-        .select('role')
-        .eq('id', user.id)
-        .single()
-
-      if (roleError || !userData) {
-        throw new Error('Failed to get user role')
-      }
-
-      if (userData.role !== 'DOCTOR') {
-        router.push('/login')
-        return
-      }
-
-      setUserRole(userData.role)
-    } catch (error) {
-      console.error('Error checking user role:', error)
-      router.push('/login')
-    }
-  }
+    fetchAppointments()
+  }, [filterType, filterStatus])
 
   const getDateRange = () => {
     const now = new Date()
@@ -195,37 +157,13 @@ export default function DoctorDashboard() {
     }
   }
 
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut()
-      router.push('/login')
-    } catch (error) {
-      console.error('Error signing out:', error)
-    }
-  }
-
   const handleViewDetails = (appointment: Appointment) => {
     setSelectedAppointment(appointment)
     setIsModalOpen(true)
   }
 
-  if (userRole !== 'DOCTOR') {
-    return null
-  }
-
   return (
     <div className="space-y-8">
-      {/* Header with Logout Button */}
-      <div className="flex justify-end">
-        <button
-          onClick={handleLogout}
-          className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors"
-        >
-          Logout
-        </button>
-      </div>
-
-      {/* Hero Section */}
       <HeroSection
         title="Welcome to Doctor Dashboard"
         subtitle="Manage your appointments and provide quality healthcare services"
@@ -234,12 +172,12 @@ export default function DoctorDashboard() {
         actions={[
           {
             label: "View Schedule",
-            href: "#",
+            href: "#appointments",
             className: "bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
           },
           {
-            label: "Manage Patients",
-            href: "#",
+            label: "Today's queue",
+            href: "#appointments",
             className: "bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors"
           }
         ]}
@@ -318,7 +256,7 @@ export default function DoctorDashboard() {
       </div>
 
       {/* Appointments Section */}
-      <div className="space-y-4">
+      <div id="appointments" className="space-y-4">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold">All Appointments</h2>
           <div className="grid grid-cols-2 gap-4">

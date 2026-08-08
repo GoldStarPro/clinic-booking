@@ -1,16 +1,11 @@
-import { ThemeSwitcher } from '@/components/ThemeSwitcher';
+import { ThemeSwitcher } from '@/components/ThemeSwitcher'
+import { DashboardShell } from '@/components/DashboardShell'
 
-export default function PatientLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function PatientLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen p-8">
+    <>
       <ThemeSwitcher />
-      <div className="mx-auto max-w-7xl">
-        {children}
-      </div>
-    </div>
-  );
-} 
+      <DashboardShell role="PATIENT">{children}</DashboardShell>
+    </>
+  )
+}

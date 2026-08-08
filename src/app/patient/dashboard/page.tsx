@@ -32,52 +32,14 @@ export default function PatientDashboard() {
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [userRole, setUserRole] = useState('')
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [filterType, setFilterType] = useState('ALL') // ALL, TODAY, WEEK, MONTH
   const [filterStatus, setFilterStatus] = useState('ALL') // ALL, CONFIRMED, PENDING, CANCELLED
 
   useEffect(() => {
-    checkUserRole()
-  }, [])
-
-  useEffect(() => {
-    if (userRole === 'PATIENT') {
-      fetchAppointments()
-    }
-  }, [userRole, filterType, filterStatus])
-
-  const checkUserRole = async () => {
-    try {
-      const { data: { user }, error: userError } = await supabase.auth.getUser()
-      
-      if (userError || !user) {
-        router.push('/login')
-        return
-      }
-
-      const { data: userData, error: roleError } = await supabase
-        .from('User')
-        .select('role')
-        .eq('id', user.id)
-        .single()
-
-      if (roleError || !userData) {
-        throw new Error('Failed to get user role')
-      }
-
-      if (userData.role !== 'PATIENT') {
-        router.push('/login')
-        return
-      }
-
-      setUserRole(userData.role)
-    } catch (error) {
-      console.error('Error checking user role:', error)
-      router.push('/login')
-    }
-  }
+    void fetchAppointments()
+  }, [filterType, filterStatus])
 
   const fetchAppointments = async () => {
     try {
@@ -137,37 +99,13 @@ export default function PatientDashboard() {
     }
   }
 
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut()
-      router.push('/login')
-    } catch (error) {
-      console.error('Error signing out:', error)
-    }
-  }
-
   const handleViewDetails = (appointment: Appointment) => {
     setSelectedAppointment(appointment)
     setIsModalOpen(true)
   }
 
-  if (userRole !== 'PATIENT') {
-    return null
-  }
-
   return (
     <div className="space-y-8">
-      {/* Header with Logout Button */}
-      <div className="flex justify-end">
-        <button
-          onClick={handleLogout}
-          className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors"
-        >
-          Logout
-        </button>
-      </div>
-
-      {/* Hero Section */}
       <HeroSection
         title="Welcome to Our Clinic"
         subtitle="We provide high-quality healthcare services with our professional medical team"

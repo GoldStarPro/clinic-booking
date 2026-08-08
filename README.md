@@ -240,6 +240,7 @@ clinic-booking/
 │   ├── components/          # Theme, hydration gate, UI
 │   ├── lib/                 # supabase, security, theme, dates
 │   └── middleware.ts        # Auth gate + security headers
+├── prisma.config.ts         # Prisma CLI (schema path + seed); not package.json#prisma
 ├── prisma/
 │   ├── schema.prisma
 │   ├── seed.ts              # Auth + User seed (needs service role)

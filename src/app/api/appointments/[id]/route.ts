@@ -3,6 +3,7 @@ import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { checkRateLimit, getClientIP, isValidUUID } from '@/lib/security'
 
+// Patient updates their own appointment status (e.g. cancel)
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -91,6 +92,7 @@ export async function PATCH(
       )
     }
 
+    console.log('Appointment status updated:', id, '->', status)
     return NextResponse.json(updatedAppointment)
   } catch (error) {
     console.error('Error updating appointment:', error)

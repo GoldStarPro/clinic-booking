@@ -7,9 +7,9 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
   try {
-    // Rate limiting - stricter for registration
+    // Rate limiting — stricter for registration (5 requests / 5 minutes)
     const clientIP = getClientIP(request.headers)
-    if (checkRateLimit(`register-${clientIP}`, 5, 300000)) { // 5 requests per 5 minutes
+    if (checkRateLimit(`register-${clientIP}`, 5, 300000)) {
       return NextResponse.json(
         { error: 'Too many registration attempts. Please try again later.' },
         { status: 429 }
@@ -18,10 +18,10 @@ export async function POST(request: Request) {
 
     console.log('Register request received')
     const body = await request.json()
-    
-    // Validate and sanitize input
+
     const validation = validateRegistrationData(body)
     if (!validation.isValid) {
+      console.error('Registration validation failed:', validation.errors)
       return NextResponse.json(
         { error: 'Validation failed', details: validation.errors },
         { status: 400 }
@@ -29,12 +29,10 @@ export async function POST(request: Request) {
     }
 
     const { email, password, name, phone, address } = validation.sanitized!
-
-    // Initialize Supabase client
     const supabase = createRouteHandlerClient({ cookies })
 
-    // Sign up with Supabase Auth
-    console.log('Attempting to sign up with Supabase')
+    // Create Auth user first; public.User uses the same id
+    console.log('Attempting to sign up with Supabase:', email)
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -64,9 +62,8 @@ export async function POST(request: Request) {
       )
     }
 
-    console.log('Auth successful, user data:', data.user)
+    console.log('Auth successful, user id:', data.user.id)
 
-    // Create user profile in database using Supabase client
     console.log('Creating user profile in database')
     try {
       const { data: userData, error: insertError } = await supabase
@@ -94,8 +91,8 @@ export async function POST(request: Request) {
         )
       }
 
-      console.log('User profile created:', userData)
-      return NextResponse.json({ 
+      console.log('User profile created:', userData.id)
+      return NextResponse.json({
         user: userData,
         message: 'Registration successful'
       })
@@ -106,11 +103,12 @@ export async function POST(request: Request) {
         { status: 500 }
       )
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Registration error:', error)
+    const message = error instanceof Error ? error.message : 'Failed to register'
     return NextResponse.json(
-      { error: error.message || 'Failed to register' },
+      { error: message },
       { status: 500 }
     )
   }
-} 
+}

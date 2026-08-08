@@ -1,14 +1,11 @@
-import { ThemeSwitcher } from '@/components/ThemeSwitcher';
+import { ThemeSwitcher } from '@/components/ThemeSwitcher'
+import { DashboardShell } from '@/components/DashboardShell'
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <ThemeSwitcher />
-      {children}
+      <DashboardShell role="ADMIN">{children}</DashboardShell>
     </>
-  );
-} 
+  )
+}
