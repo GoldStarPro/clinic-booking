@@ -23,10 +23,12 @@ export default function BookAppointment() {
   const [notes, setNotes] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [minDate, setMinDate] = useState('')
   const supabase = createClientComponentClient()
 
   useEffect(() => {
     fetchDoctors()
+    setMinDate(new Date().toISOString().split('T')[0])
   }, [])
 
   const fetchDoctors = async () => {
@@ -140,7 +142,7 @@ export default function BookAppointment() {
               value={date}
               onChange={(e) => setDate(e.target.value)}
               required
-              min={new Date().toISOString().split('T')[0]}
+              min={minDate || undefined}
             />
           </div>
 

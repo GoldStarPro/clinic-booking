@@ -1,0 +1,81 @@
+name: Security Autofix PR
+
+# Bot tự tạo PR khi phát hiện lỗ hổng dependency có thể vá bằng npm.
+# Bạn chỉ cần review + merge. (RLS/Supabase advisor vẫn cần chạy migration SQL.)
+
+on:
+  schedule:
+    - cron: "0 3 * * 1" # Thứ 2 hàng tuần 03:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  dependency-autofix:
+    name: npm audit fix → PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Attempt non-breaking audit fix
+        id: auditfix
+        run: |
+          before=$(npm audit --json 2>/dev/null | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const j=JSON.parse(d);console.log(j.metadata?.vulnerabilities?.total??0)}catch{console.log(0)}})")
+          npm audit fix --omit=dev || true
+          npm install postcss@^8.5.26 --save-dev || true
+          after=$(npm audit --json 2>/dev/null | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const j=JSON.parse(d);console.log(j.metadata?.vulnerabilities?.total??0)}catch{console.log(0)}})")
+          echo "before=$before" >> "$GITHUB_OUTPUT"
+          echo "after=$after" >> "$GITHUB_OUTPUT"
+          if git diff --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create Pull Request
+        if: steps.auditfix.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "fix(security): auto-patch npm vulnerabilities"
+          branch: chore/security-autofix
+          delete-branch: true
+          title: "fix(security): auto-patch npm vulnerabilities"
+          labels: security, dependencies, automated
+          body: |
+            ## Summary
+            Bot phát hiện và vá lỗ hổng dependency (`npm audit fix` + PostCSS pin).
+
+            - Vulnerabilities before: `${{ steps.auditfix.outputs.before }}`
+            - Vulnerabilities after: `${{ steps.auditfix.outputs.after }}`
+
+            ## Test plan
+            - [ ] `npm ci && npm run build`
+            - [ ] `npm run security-check`
+            - [ ] `npm audit --omit=dev`
+
+            > **Supabase Security Advisor:** chạy `supabase/migrations/20260808120000_rls_canonical.sql` trên SQL Editor.
+            > Leaked password protection chỉ có trên **Pro Plan** (Free: bỏ qua; giữ min password length ≥ 8).
+
+  supabase-rls-guard:
+    name: Fail if RLS anti-patterns regress
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Lint Supabase SQL for security regressions
+        run: node scripts/supabase-security-lint.js
