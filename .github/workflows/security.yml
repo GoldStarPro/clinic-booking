@@ -32,6 +32,23 @@ jobs:
       - name: Production audit (fail on high+)
         run: npm audit --omit=dev --audit-level=high
 
+      - name: Verify sharp is patched (>= 0.35.0)
+        run: |
+          node -e "
+            let v;
+            try { v = require('sharp/package.json').version; } catch {
+              console.log('sharp not installed (optional); skip');
+              process.exit(0);
+            }
+            const [maj, min] = v.split('.').map(Number);
+            const ok = maj > 0 || (maj === 0 && min >= 35);
+            if (!ok) {
+              console.error('Vulnerable sharp:', v, '(need >= 0.35.0)');
+              process.exit(1);
+            }
+            console.log('sharp OK:', v);
+          "
+
       - name: Full audit report
         run: npm audit --audit-level=moderate
         continue-on-error: true

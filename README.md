@@ -9,6 +9,7 @@
 [![Supabase](https://img.shields.io/badge/Supabase-Auth_+_Postgres-3FCF8E?logo=supabase&logoColor=white)](https://supabase.com/)
 [![Prisma](https://img.shields.io/badge/Prisma-6-2D3748?logo=prisma&logoColor=white)](https://www.prisma.io/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
 A web application for managing clinic appointments.
 
@@ -250,6 +251,7 @@ clinic-booking/
 ├── docs/                    # Full project documentation (VI)
 ├── .github/                 # Dependabot + security workflows
 ├── public/
+├── LICENSE                  # MIT
 └── package.json
 ```
 
@@ -272,12 +274,23 @@ clinic-booking/
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
+## License
+
+This project is licensed under the [MIT License](./LICENSE).
+
 <div align="center">
 
 ---
 
-**Clinic Booking** · MIT License · [Docs](./docs/README.md) · [Security](./docs/security/SECURITY.md)
+### ✨ Built with ❤️ by **Tran Huy Hoang**
 
-This project is licensed under the MIT License — see the LICENSE file for details.
+[![GitHub](https://img.shields.io/badge/GitHub-goldhoang-181717?style=for-the-badge&logo=github)](https://github.com/goldhoang)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](./LICENSE)
+[![Docs](https://img.shields.io/badge/Docs-Read_me-4F46E5?style=for-the-badge&logo=readthedocs&logoColor=white)](./docs/README.md)
+[![Security](https://img.shields.io/badge/Security-Handbook-059669?style=for-the-badge&logo=shieldsdotio&logoColor=white)](./docs/security/SECURITY.md)
+
+**Clinic Booking** · Fullstack appointment system · © 2026 Gold Hoang
+
+[github.com/goldhoang/clinic-booking](https://github.com/goldhoang/clinic-booking)
 
 </div>
